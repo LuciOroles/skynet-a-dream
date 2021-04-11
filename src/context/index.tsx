@@ -1,8 +1,12 @@
 import * as React from 'react';
 
-type Action = { type: 'login' } | { type: 'logout' };
+type Payload = {
+  userID: string;
+};
+
+type Action = { type: 'login'; payload: Payload } | { type: 'logout' };
 type Dispatch = (action: Action) => void;
-type State = { logged: boolean };
+type State = { logged: boolean; userID?: string };
 type LoginProviderProps = { children: React.ReactNode };
 
 const LoginStateContext = React.createContext<
@@ -11,8 +15,9 @@ const LoginStateContext = React.createContext<
 
 function loginReducer(state: State, action: Action) {
   switch (action.type) {
-    case 'login':
-      return { logged: true };
+    case 'login': {
+      return { logged: true, userID: action.payload.userID };
+    }
     case 'logout':
       return { logged: false };
     default:
