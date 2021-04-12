@@ -1479,6 +1479,15 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
+"@skynethq/content-record-library@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@skynethq/content-record-library/-/content-record-library-0.2.1.tgz#c48d793def01c1a37bb059c9e03b1a8ba36a8dd9"
+  integrity sha512-QB1sAGVyDa9mPWxxyMs+U70WcJGe1jivfHlVQ2ZZ0nFpU8Y2W3dHNM2bax8HdM1EGLEv/kfk57LY7NW5WNLclA==
+  dependencies:
+    post-me "^0.4.5"
+    skynet-js "^4.0.0-beta"
+    skynet-mysky-utils "^0.1.0"
+
 "@surma/rollup-plugin-off-main-thread@^1.1.1":
   version "1.4.2"
   resolved "https://registry.yarnpkg.com/@surma/rollup-plugin-off-main-thread/-/rollup-plugin-off-main-thread-1.4.2.tgz#e6786b6af5799f82f7ab3a82e53f6182d2b91a58"
@@ -9878,7 +9887,7 @@ skynet-js@^4.0.0-beta:
     url-join "^4.0.1"
     url-parse "1.4.7"
 
-skynet-mysky-utils@^0.1.2:
+skynet-mysky-utils@^0.1.0, skynet-mysky-utils@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/skynet-mysky-utils/-/skynet-mysky-utils-0.1.2.tgz#1ca5e9cf69a71ac67dd805c90371fd71f622adc1"
   integrity sha512-ehPGwIIMldrG6S4ynkvElcqMeSrT85ignto1z/Nx3yFcHiiNDRLq5y6ZGXdSSNw2XfVSi8e66wjbL0qlNNCZog==

@@ -1,14 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { SkynetClient } from 'skynet-js';
+import { ContentRecordDAC } from '@skynethq/content-record-library';
+const contentRecord = new ContentRecordDAC();
 
 const client = new SkynetClient('https://siasky.net/');
 const dataDomain = 'localhost';
 
 const useSkyStatus = () => {
-  const [instance, setInstance] = useState<any>(undefined);
+  const [mySky, setInstance] = useState<any>(undefined);
   const initMySky = useCallback(async () => {
     try {
       const mySky = await client.loadMySky(dataDomain);
+      await mySky.loadDacs(contentRecord);
+
       setInstance(mySky);
     } catch (error) {
       console.error(error);
@@ -21,7 +25,9 @@ const useSkyStatus = () => {
   }, [initMySky]);
 
   return {
-    instance,
+    client,
+    mySky,
+    contentRecord,
   };
 };
 

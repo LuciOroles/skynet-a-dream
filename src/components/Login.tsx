@@ -5,17 +5,17 @@ import { useLogin } from '../context';
 
 const Login = () => {
   const { state } = useLogin();
-  const { instance } = useSkyStatus();
+  const { mySky } = useSkyStatus();
   const { dispatch } = useLogin();
 
   const handleClick = async () => {
-    if (!instance) return;
+    if (!mySky) return;
 
     if (!state.logged) {
-      const status = await instance.requestLoginAccess();
+      const status = await mySky.requestLoginAccess();
 
       if (status) {
-        const userID = await instance.userID();
+        const userID = await mySky.userID();
 
         dispatch({
           type: 'login',
@@ -25,17 +25,17 @@ const Login = () => {
         });
       }
     } else {
-      await instance.logout();
+      await mySky.logout();
       dispatch({ type: 'logout' });
     }
   };
 
   useEffect(() => {
-    if (instance && !state.logged) {
+    if (mySky && !state.logged) {
       (async () => {
-        const logged = await instance.checkLogin();
+        const logged = await mySky.checkLogin();
         if (logged) {
-          const userID = await instance.userID();
+          const userID = await mySky.userID();
           if (userID) {
             dispatch({
               type: 'login',
@@ -47,7 +47,7 @@ const Login = () => {
         }
       })();
     }
-  }, [dispatch, instance, state.logged]);
+  }, [dispatch, mySky, state.logged]);
 
   const message = state.logged ? 'Log out from' : 'Login to';
   return (
