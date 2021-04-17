@@ -1,12 +1,13 @@
 import React, { ChangeEvent, useState } from 'react';
 import AccessOtherUser from './AccessOtherUser';
-import useSkyStatus from '../context/useSkyStatus';
+import useDataServices from '../context/useDataServices';
 
 const AccessDB = () => {
   const [filePath, setfilePath] = useState<string>('');
-
+  const [loading, setLoading] = useState<boolean>(false);
   const [name, setname] = useState<string>('');
-  const { mySky } = useSkyStatus();
+  const { getJson, setJson } = useDataServices(filePath);
+
   const handleChange = (setChange: (a: string) => void) => (
     ev: ChangeEvent
   ) => {
@@ -15,57 +16,56 @@ const AccessDB = () => {
   const setFile = handleChange(setfilePath);
   const setName = handleChange(setname);
 
-  const setJson = async () => {
-    try {
-      console.log('filePath', filePath);
-      const r = await mySky.setJSON(filePath, {
-        name,
-      });
+  const handleSetJson = async () => {
+    setLoading(true);
+    const result = await setJson(filePath);
+    setLoading(false);
 
-      console.log(r);
-    } catch (error) {
-      console.log(`error with setJSON: ${error.message}`);
-    }
+    console.log(result);
   };
-
-  const getJson = async () => {
-    try {
-      const { data } = await mySky.getJSON(filePath);
-      console.log(data);
-      debugger;
-    } catch (error) {
-      console.error(`Unable to get the json data ${error}`);
-    }
+  const handleGetJson = async () => {
+    setLoading(true);
+    const d = await getJson(filePath);
+    console.log(d);
+    setLoading(false);
   };
 
   return (
     <div>
       <div>
         <h3>Get data for my ID</h3>
-        <div>
-          <label>
-            filePath:
-            <input type="text" value={filePath} onChange={setFile} />
-          </label>
-          <label>
-            name field:
-            <input type="text" value={name} onChange={setName} />
-          </label>
-          <div>
-            <button
-              type="button"
-              disabled={!filePath || !name}
-              onClick={setJson}
-            >
-              updateJSON
-            </button>
+        {loading && <div> Loading... </div>}
+        {!loading && (
+          <div className="data-container">
+            <label>
+              filePath:
+              <input type="text" value={filePath} onChange={setFile} />
+            </label>
+            <label>
+              name field:
+              <input type="text" value={name} onChange={setName} />
+            </label>
+            <div>
+              <button
+                type="button"
+                disabled={!filePath || !name}
+                onClick={handleSetJson}
+              >
+                Update JSON
+              </button>
 
-            <button type="button" onClick={getJson} disabled={!filePath}>
-              getJSON
-            </button>
+              <button
+                type="button"
+                onClick={handleGetJson}
+                disabled={!filePath}
+              >
+                Get JSON
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
+
       <AccessOtherUser />
     </div>
   );

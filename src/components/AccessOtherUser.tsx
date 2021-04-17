@@ -34,21 +34,31 @@ const AccessOther = () => {
   return (
     <div>
       <h3>Get data for another ID</h3>
-      <label>
-        filePath:
-        <input type="text" value={filePath} onChange={setFile} />
-      </label>
-      <label>
-        id:
-        <input type="text" value={secondUser} onChange={setSecondUserName} />
-      </label>
-      <button
-        type="button"
-        onClick={handleGetUser}
-        disabled={!secondUser || !filePath}
-      >
-        Get data
-      </button>
+      <div className="data-container">
+        <div>
+          <label>
+            File Path:
+            <input type="text" value={filePath} onChange={setFile} />
+          </label>
+        </div>
+        <div>
+          <label>
+            id:
+            <input
+              type="text"
+              value={secondUser}
+              onChange={setSecondUserName}
+            />
+          </label>
+        </div>
+        <button
+          type="button"
+          onClick={handleGetUser}
+          disabled={!secondUser || !filePath}
+        >
+          Get data
+        </button>
+      </div>
     </div>
   );
 };

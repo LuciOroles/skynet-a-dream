@@ -15,6 +15,7 @@ export default function ProtectedRoute({
   ...rest
 }: IProtectedRouteProps) {
   const { state } = useLogin();
+
   if (!state.logged) {
     return <Redirect to="/" />;
   }
