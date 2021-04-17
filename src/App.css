@@ -3,9 +3,8 @@
 }
 
 .header {
-  width: 100%;
   font-size: 20px;
-  padding: 1em 0;
+  padding: 1em 1.25em;
   display: flex;
 }
 
