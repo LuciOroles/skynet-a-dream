@@ -16,3 +16,13 @@
   flex: 1;
   overflow: hidden;
 }
+
+.listMenu {
+  list-style: none;
+  display: flex;
+}
+
+.listMenu > li {
+  display: flex;
+  flex: 1;
+}
