@@ -16,15 +16,19 @@ const useDataServices = (filePath: string) => {
 
   const { mySky } = useSkyStatus();
 
-  const setJson = async (data: Object) => {
+  const setJson = async (input: Object) => {
 
 
     try {
-      await mySky.setJSON(filePath, {
-        data: JSON.stringify(data),
+      const { data, skylink } = await mySky.setJSON(filePath, {
+        data: JSON.stringify(input),
       });
 
-      return { done: true };
+      return {
+        done: true,
+        data,
+        skylink
+      };
     } catch (error) {
       console.error(`Unable to setJSON: ${error.message}`);
       return {
@@ -36,7 +40,7 @@ const useDataServices = (filePath: string) => {
   const getJson = async () => {
     try {
       const { data } = await mySky.getJSON(filePath);
-
+      debugger;
       return {
         data: data
       };

@@ -5,7 +5,7 @@ import useDataServices from '../context/useDataServices';
 const AccessDB = () => {
   const [filePath, setfilePath] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [name, setname] = useState<string>('');
+  const [jsonObj, setJsonObj] = useState<string>('');
   const { getJson, setJson } = useDataServices(filePath);
 
   const handleChange = (setChange: (a: string) => void) => (
@@ -14,14 +14,19 @@ const AccessDB = () => {
     setChange((ev.target as HTMLInputElement).value);
   };
   const setFile = handleChange(setfilePath);
-  const setName = handleChange(setname);
+  const setName = handleChange(setJsonObj);
 
   const handleSetJson = async () => {
-    setLoading(true);
-    const result = await setJson(filePath);
-    setLoading(false);
+    try {
+      const parsedData = JSON.parse(jsonObj);
+      setLoading(true);
+      const result = await setJson(parsedData);
+      setLoading(false);
 
-    console.log(result);
+      console.log(result);
+    } catch (err) {
+      console.log(`Unable to update ${err}`);
+    }
   };
   const handleGetJson = async () => {
     setLoading(true);
@@ -37,18 +42,22 @@ const AccessDB = () => {
         {loading && <div> Loading... </div>}
         {!loading && (
           <div className="data-container">
-            <label>
-              filePath:
-              <input type="text" value={filePath} onChange={setFile} />
-            </label>
-            <label>
-              name field:
-              <input type="text" value={name} onChange={setName} />
-            </label>
+            <div>
+              <label>
+                filePath:
+                <input type="text" value={filePath} onChange={setFile} />
+              </label>
+            </div>
+            <div>
+              <label>
+                Json value, add valid json:
+                <textarea rows={3} value={jsonObj} onChange={setName} />
+              </label>
+            </div>
             <div>
               <button
                 type="button"
-                disabled={!filePath || !name}
+                disabled={!filePath || !jsonObj}
                 onClick={handleSetJson}
               >
                 Update JSON
