@@ -55,6 +55,7 @@ const AccessOther = () => {
           type="button"
           onClick={handleGetUser}
           disabled={!secondUser || !filePath}
+          className="spaced-button"
         >
           Get data
         </button>

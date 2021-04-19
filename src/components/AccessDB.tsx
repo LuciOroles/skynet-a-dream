@@ -65,6 +65,7 @@ const AccessDB = () => {
                 type="button"
                 disabled={!filePath || !jsonObj}
                 onClick={handleSetJson}
+                className="spaced-button"
               >
                 Update JSON
               </button>
@@ -73,6 +74,7 @@ const AccessDB = () => {
                 type="button"
                 onClick={handleGetJson}
                 disabled={!filePath}
+                className="spaced-button"
               >
                 Get JSON
               </button>

@@ -31,3 +31,12 @@
   display: flex;
   justify-content: space-between;
 }
+
+.spaced-button {
+  margin-left: 1em;
+  margin-top: 0.5em;
+  color: #e4e4e4;
+  background-color: lightblue;
+  border: none;
+  font-size: 1.3em;
+}
