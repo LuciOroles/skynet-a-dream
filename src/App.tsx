@@ -9,6 +9,7 @@ import AccessDB from './components/AccessDB';
 import NavBar from './components/NavBar';
 import Main from './components/Main';
 import ProtectedRoute from './components/ProtectedRoute';
+import GraphContainer from './components/GraphContainer';
 
 function App() {
   return (
@@ -20,6 +21,8 @@ function App() {
           <Switch>
             <ProtectedRoute exact path="/dev" component={AccessDB} />
             <ProtectedRoute exact path="/upload" component={UploadFile} />
+            <ProtectedRoute exact path="/graph" component={GraphContainer} />
+
             <Route path="/" component={Main} />
           </Switch>
         </Router>

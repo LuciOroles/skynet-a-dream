@@ -1,6 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import useUserList, { SiaUser } from '../context/useUserList';
-const endpoint = process.env.REACT_APP_USERS as string;
 const endpoint1 = process.env.REACT_APP_USERS1 as string;
 
 export default function Main(): ReactElement {

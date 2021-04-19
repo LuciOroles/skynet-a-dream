@@ -9,10 +9,13 @@ export default function NavBar(): ReactElement {
           <Link to="/">Main </Link>
         </li>
         <li>
-          <Link to="/dev">Debuger area</Link>
+          <Link to="/graph">Graph</Link>
         </li>
         <li>
           <Link to="/upload">Upload</Link>
+        </li>
+        <li>
+          <Link to="/dev">Debuger area</Link>
         </li>
       </ul>
     </nav>
