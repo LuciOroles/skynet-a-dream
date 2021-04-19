@@ -1,12 +1,15 @@
 import React, { ChangeEvent, useState } from 'react';
 import AccessOtherUser from './AccessOtherUser';
 import useDataServices from '../context/useDataServices';
+import useSkylinkUrl from '../context/useSkylinkUrl';
 
 const AccessDB = () => {
   const [filePath, setfilePath] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [jsonObj, setJsonObj] = useState<string>('');
   const { getJson, setJson } = useDataServices(filePath);
+  const [apiSkyLink, setUserSkyLink] = useState<string>('');
+  const skyLinkUrlPath = useSkylinkUrl(apiSkyLink);
 
   const handleChange = (setChange: (a: string) => void) => (
     ev: ChangeEvent
@@ -21,6 +24,9 @@ const AccessDB = () => {
       const parsedData = JSON.parse(jsonObj);
       setLoading(true);
       const result = await setJson(parsedData);
+      if (result.skylink) {
+        setUserSkyLink(result.skylink);
+      }
       setLoading(false);
 
       console.log(result);
@@ -71,6 +77,14 @@ const AccessDB = () => {
                 Get JSON
               </button>
             </div>
+            {skyLinkUrlPath && (
+              <div>
+                <div>skyLink url</div>
+                <a href={skyLinkUrlPath} target="_blank" rel="noreferrer">
+                  new link
+                </a>
+              </div>
+            )}
           </div>
         )}
       </div>
