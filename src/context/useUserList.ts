@@ -5,9 +5,16 @@ export interface SiaUser {
     id: string;
 }
 
+export type SiaFileData = {
+    _data: {
+        data: string
+    }
+}
+
 export type SiaUsers = {
     siaUsers: SiaUser[];
 }
+
 
 const useUserList = (endpoint: string) => {
 
@@ -24,8 +31,17 @@ const useUserList = (endpoint: string) => {
         });
         setLoading(true);
 
-        fetch(req).then((data) => data.json()).then((data) => {
-            setUserList(data);
+        fetch(req).then((data) => data.json()).then((data: SiaFileData & SiaUsers) => {
+            if (data._data) {
+                try {
+                    const users = JSON.parse(data._data.data) as SiaUsers;
+                    setUserList(users)
+                } catch (err) {
+                    console.log(err)
+                }
+            } else {
+                setUserList(data);
+            }
 
         }).catch((error) => {
             setError(error);
