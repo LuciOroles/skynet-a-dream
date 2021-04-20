@@ -1,0 +1,68 @@
+import { useEffect, useState } from 'react';
+
+type Coords = {
+    x: number;
+    y: number;
+};
+
+type DotConfig = {
+    radius: number;
+    color: string;
+};
+
+interface AddDot {
+    (d: Coords): void;
+};
+
+type CircleConfig = {
+    radius: number;
+    color: string;
+    startPos: Coords;
+};
+
+export function createCircle(drawCtx: any, circleConfig: CircleConfig) {
+    const { startPos } = circleConfig;
+
+    var circle = drawCtx
+        .circle(circleConfig.radius * 2)
+        .attr({ fill: circleConfig.color });
+    circle.move(startPos.x, startPos.y);
+
+    return circle;
+}
+
+const useSvgDotsOnClick = (
+    drawCtx: CanvasRenderingContext2D,
+    dot: DotConfig,
+    onAddDot: AddDot
+) => {
+    const [svg, setSvg] = useState<SVGElement>();
+    const [listener, setListener] = useState<number>(0);
+
+    useEffect(() => {
+        const svgS = document.querySelector('#canvas>svg') as SVGElement;
+        if (svgS && !svg) setSvg(svgS);
+        if (svg && listener === 0) {
+            setListener(listener + 1);
+            svg.addEventListener('click', (e: MouseEvent) => {
+                const target = e.target as SVGElement;
+                var rect = target.getBoundingClientRect();
+                var x = e.clientX - rect.left;
+                var y = e.clientY - rect.top;
+                const coords: Coords = {
+                    x,
+                    y,
+                };
+                createCircle(drawCtx, {
+                    ...dot,
+                    startPos: {
+                        ...coords,
+                    },
+                });
+                onAddDot(coords);
+            });
+        }
+    }, [drawCtx, svg, dot, onAddDot, listener]);
+};
+
+export default useSvgDotsOnClick;

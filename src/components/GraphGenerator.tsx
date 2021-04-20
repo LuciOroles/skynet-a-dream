@@ -7,28 +7,12 @@ import React, {
 } from 'react';
 import { SVG } from '@svgdotjs/svg.js';
 import useDataServices from '../context/useDataServices';
+import useSvgDotsOnClick, { createCircle } from '../context/useSvgDotsOnClick';
 
 type Coords = {
   x: number;
   y: number;
 };
-
-type CircleConfig = {
-  radius: number;
-  color: string;
-  startPos: Coords;
-};
-
-function createCircle(draw: any, circleConfig: CircleConfig) {
-  const { startPos } = circleConfig;
-
-  var circle = draw
-    .circle(circleConfig.radius * 2)
-    .attr({ fill: circleConfig.color });
-  circle.move(startPos.x, startPos.y);
-
-  return circle;
-}
 
 const useSVGContext = (canvasRef: RefObject<HTMLDivElement>) => {
   const [drawCtx, setDrawContext] = useState<any>(null);
@@ -41,62 +25,26 @@ const useSVGContext = (canvasRef: RefObject<HTMLDivElement>) => {
   return drawCtx;
 };
 
-type DotConfig = {
-  radius: number;
-  color: string;
-};
-interface AddDot {
-  (d: Coords): void;
+interface Props {
+  path: string;
 }
 
-const useSvgDotsOnClick = (
-  drawCtx: CanvasRenderingContext2D,
-  dot: DotConfig,
-  onAddDot: AddDot
-) => {
-  const [svg, setSvg] = useState<SVGElement>();
-  const [listener, setListener] = useState<number>(0);
-
-  useEffect(() => {
-    const svgS = document.querySelector('#canvas>svg') as SVGElement;
-    if (svgS && !svg) setSvg(svgS);
-    if (svg && listener === 0) {
-      setListener(listener + 1);
-      svg.addEventListener('click', (e: MouseEvent) => {
-        const target = e.target as SVGElement;
-        var rect = target.getBoundingClientRect();
-        var x = e.clientX - rect.left;
-        var y = e.clientY - rect.top;
-        const coords: Coords = {
-          x,
-          y,
-        };
-        createCircle(drawCtx, {
-          ...dot,
-          startPos: {
-            ...coords,
-          },
-        });
-        onAddDot(coords);
-      });
-    }
-  }, [drawCtx, svg, dot, onAddDot, listener]);
-};
-
-export default function GraphGenerator(): ReactElement {
+export default function GraphGenerator({ path }: Props): ReactElement {
   const canvasRef = createRef<HTMLDivElement>();
   const drawCtx = useSVGContext(canvasRef);
   const [dotCollection, setDotCollection] = useState<Coords[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const { setJson } = useDataServices('sky1.json');
+  const { setJson, getJson } = useDataServices(path);
   const handleAddCoords = (c: Coords) => {
     setDotCollection((d) => {
       return [...d, c];
     });
   };
+
   useSvgDotsOnClick(drawCtx, { radius: 7, color: '#542aea' }, handleAddCoords);
-  const handleButtonClick = async () => {
+
+  const handleSendData = async () => {
     setLoading(true);
     try {
       const coords = {
@@ -111,19 +59,66 @@ export default function GraphGenerator(): ReactElement {
     setLoading(false);
   };
 
+  const handleGetData = async () => {
+    try {
+      const { data } = await getJson(path);
+      debugger;
+      const d = JSON.parse(data.data);
+      const d1 = JSON.parse(d);
+      if (d1.dots) {
+        setDotCollection(d1.dots);
+      }
+    } catch (error) {
+      console.error(`unable to get the dots: ${error}`);
+    }
+  };
+  const handleDrawDots = () => {
+    if (dotCollection.length) {
+      drawDots();
+    } else {
+      alert('No data dots');
+    }
+  };
+  const drawDots = () => {
+    dotCollection.map((dot) => {
+      createCircle(drawCtx, {
+        radius: 7,
+        color: '#542aea',
+        startPos: { ...dot },
+      });
+    });
+  };
+
   return (
     <div>
       {loading && <div>Loading...</div>}
       {!loading && <div id="canvas" ref={canvasRef} />}
-      <div>
+      <div className="button-group">
         <button
           type="button"
-          onClick={handleButtonClick}
+          onClick={handleSendData}
           className="spaced-button"
           disabled={loading}
         >
           Send data
         </button>
+
+        <button type="button" className="spaced-button" onClick={handleGetData}>
+          Get Dots
+        </button>
+        <button
+          type="button"
+          className="spaced-button"
+          onClick={handleDrawDots}
+        >
+          Draw Dots
+        </button>
+      </div>
+      <div>
+        <h4>Dot collection:</h4>
+        {dotCollection.map((dot, i) => {
+          return <span key={i}>{JSON.stringify(dot)}</span>;
+        })}
       </div>
     </div>
   );

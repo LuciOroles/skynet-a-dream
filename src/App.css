@@ -33,12 +33,30 @@
 }
 
 .spaced-button {
-  margin-left: 1em;
-  margin-top: 0.5em;
-  color: #e4e4e4;
-  background-color: lightblue;
-  border: none;
-  font-size: 1.3em;
+  background: transparent;
+  border: 2px solid #c5c5c5;
+  border-radius: 12px;
+  color: lightgreen;
+  padding: 0.4em 1em;
+  margin: 0.5em;
+  cursor: pointer;
+}
+.spaced-button[disabled] {
+  color: #333;
+  border-color: #333;
+}
+
+.spaced-button:hover {
+  background-color: rgb(13, 88, 138);
+  color: white;
+}
+
+.spaced-button:active {
+  outline: none;
+}
+
+.button-group {
+  margin: 0.5em 1em;
 }
 
 #canvas > svg {
