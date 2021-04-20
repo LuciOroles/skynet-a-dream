@@ -6,8 +6,9 @@ import React, {
   RefObject,
 } from 'react';
 import { SVG } from '@svgdotjs/svg.js';
+import useDataServices from '../context/useDataServices';
 
-export type Coords = {
+type Coords = {
   x: number;
   y: number;
 };
@@ -86,17 +87,44 @@ export default function GraphGenerator(): ReactElement {
   const canvasRef = createRef<HTMLDivElement>();
   const drawCtx = useSVGContext(canvasRef);
   const [dotCollection, setDotCollection] = useState<Coords[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const { setJson } = useDataServices('sky1.json');
   const handleAddCoords = (c: Coords) => {
     setDotCollection((d) => {
       return [...d, c];
     });
   };
   useSvgDotsOnClick(drawCtx, { radius: 7, color: '#542aea' }, handleAddCoords);
+  const handleButtonClick = async () => {
+    setLoading(true);
+    try {
+      const coords = {
+        dots: dotCollection,
+      };
+      const result = await setJson(JSON.stringify(coords));
+
+      console.log(result);
+    } catch (error) {
+      console.error(`unable to set the graph dots coors  ${error}`);
+    }
+    setLoading(false);
+  };
 
   return (
     <div>
-      <div id="canvas" ref={canvasRef} />
-      <span>{JSON.stringify(dotCollection)}</span>
+      {loading && <div>Loading...</div>}
+      {!loading && <div id="canvas" ref={canvasRef} />}
+      <div>
+        <button
+          type="button"
+          onClick={handleButtonClick}
+          className="spaced-button"
+          disabled={loading}
+        >
+          Send data
+        </button>
+      </div>
     </div>
   );
 }
