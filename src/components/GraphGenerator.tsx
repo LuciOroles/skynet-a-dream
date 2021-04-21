@@ -1,41 +1,47 @@
-import React, {
-  ReactElement,
-  createRef,
-  useEffect,
-  useState,
-  RefObject,
-} from 'react';
-import { SVG } from '@svgdotjs/svg.js';
+import React, { ReactElement, createRef, useState, useEffect } from 'react';
+
 import useDataServices from '../context/useDataServices';
 import useSvgDotsOnClick, { createCircle } from '../context/useSvgDotsOnClick';
+import useSVGContext from '../context/useSVGContext';
+import useGetDots from '../context/useGetDots';
 
 type Coords = {
   x: number;
   y: number;
 };
 
-const useSVGContext = (canvasRef: RefObject<HTMLDivElement>) => {
-  const [drawCtx, setDrawContext] = useState<any>(null);
-  useEffect(() => {
-    if (canvasRef.current && !drawCtx) {
-      setDrawContext(SVG().addTo('#canvas').size(600, 600));
-    }
-  }, [canvasRef, drawCtx]);
-
-  return drawCtx;
-};
-
 interface Props {
   path: string;
+  dots?: Coords[];
 }
 
 export default function GraphGenerator({ path }: Props): ReactElement {
   const canvasRef = createRef<HTMLDivElement>();
   const drawCtx = useSVGContext(canvasRef);
-  const [dotCollection, setDotCollection] = useState<Coords[]>([]);
+  const dots = useGetDots('sky1.json');
+  const [dotCollection, setDotCollection] = useState<Coords[]>(dots);
   const [loading, setLoading] = useState<boolean>(false);
+  const { setJson } = useDataServices(path);
 
-  const { setJson, getJson } = useDataServices(path);
+  useEffect(() => {
+    if (dots.length) {
+      setDotCollection(dots);
+    }
+  }, [dots]);
+
+  useEffect(() => {
+    if (dotCollection.length) {
+      drawCtx.clear();
+      dotCollection.forEach((dot) => {
+        createCircle(drawCtx, {
+          radius: 7,
+          color: '#542aea',
+          startPos: { ...dot },
+        });
+      });
+    }
+  }, [dotCollection, drawCtx]);
+
   const handleAddCoords = (c: Coords) => {
     setDotCollection((d) => {
       return [...d, c];
@@ -50,43 +56,11 @@ export default function GraphGenerator({ path }: Props): ReactElement {
       const coords = {
         dots: dotCollection,
       };
-      const result = await setJson(JSON.stringify(coords));
-
-      console.log(result);
+      await setJson(JSON.stringify(coords));
     } catch (error) {
       console.error(`unable to set the graph dots coors  ${error}`);
     }
     setLoading(false);
-  };
-
-  const handleGetData = async () => {
-    try {
-      const { data } = await getJson(path);
-      debugger;
-      const d = JSON.parse(data.data);
-      const d1 = JSON.parse(d);
-      if (d1.dots) {
-        setDotCollection(d1.dots);
-      }
-    } catch (error) {
-      console.error(`unable to get the dots: ${error}`);
-    }
-  };
-  const handleDrawDots = () => {
-    if (dotCollection.length) {
-      drawDots();
-    } else {
-      alert('No data dots');
-    }
-  };
-  const drawDots = () => {
-    dotCollection.map((dot) => {
-      createCircle(drawCtx, {
-        radius: 7,
-        color: '#542aea',
-        startPos: { ...dot },
-      });
-    });
   };
 
   return (
@@ -102,24 +76,13 @@ export default function GraphGenerator({ path }: Props): ReactElement {
         >
           Send data
         </button>
-
-        <button type="button" className="spaced-button" onClick={handleGetData}>
-          Get Dots
-        </button>
-        <button
-          type="button"
-          className="spaced-button"
-          onClick={handleDrawDots}
-        >
-          Draw Dots
-        </button>
       </div>
-      <div>
+      <code>
         <h4>Dot collection:</h4>
         {dotCollection.map((dot, i) => {
           return <span key={i}>{JSON.stringify(dot)}</span>;
         })}
-      </div>
+      </code>
     </div>
   );
 }

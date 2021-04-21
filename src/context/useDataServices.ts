@@ -40,7 +40,7 @@ const useDataServices = (filePath: string) => {
   const getJson = async () => {
     try {
       const { data } = await mySky.getJSON(filePath);
-      debugger;
+
       return {
         data: data
       };

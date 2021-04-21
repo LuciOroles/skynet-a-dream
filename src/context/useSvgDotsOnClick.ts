@@ -53,12 +53,7 @@ const useSvgDotsOnClick = (
                     x,
                     y,
                 };
-                createCircle(drawCtx, {
-                    ...dot,
-                    startPos: {
-                        ...coords,
-                    },
-                });
+
                 onAddDot(coords);
             });
         }
