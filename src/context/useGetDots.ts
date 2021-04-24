@@ -11,12 +11,12 @@ export type Dot = {
 const useGetDots = (path: string) => {
     const { getJson } = useDataServices(path);
     const [dots, setDots] = useState<Dot[]>([]);
-
+    const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
         const getData = async () => {
+            setLoading(true);
             try {
-                console.log(' run get data');
                 const { data } = await getJson(path);
                 const d = data ? JSON.parse(data.data) : null;
                 if (d) {
@@ -29,6 +29,7 @@ const useGetDots = (path: string) => {
                 setDots([]);
                 console.error(`unable to get the dots: ${error}`);
             }
+            setLoading(false);
         };
         if (dots.length === 0) {
 
@@ -36,7 +37,10 @@ const useGetDots = (path: string) => {
         }
     }, [dots.length, getJson, path]);
 
-    return dots;
+    return {
+        dots,
+        loading
+    };
 };
 
 export default useGetDots;
