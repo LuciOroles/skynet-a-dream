@@ -9,7 +9,7 @@ const useSkyStatus = () => {
   const [mySky, setInstance] = useState<any>(undefined);
   const initMySky = useCallback(async () => {
     try {
-      const mySky = await client.loadMySky(hostApp, { dev: true });
+      const mySky = await client.loadMySky(hostApp, { dev: true, debug: true });
       const dac = new ContentRecordDAC();
       await mySky.loadDacs(dac);
       setInstance(mySky);

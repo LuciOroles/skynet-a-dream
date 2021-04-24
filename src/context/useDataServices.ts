@@ -15,12 +15,12 @@ const withStringCheck = (fn: Function) => {
 const useDataServices = (filePath: string) => {
 
   const { mySky } = useSkyStatus();
-
+  const domain = 'localhost';
   const setJson = async (input: Object) => {
 
 
     try {
-      const { data, skylink } = await mySky.setJSON(filePath, {
+      const { data, skylink } = await mySky.setJSON(`${domain}/${filePath}`, {
         data: JSON.stringify(input),
       });
 
@@ -39,7 +39,7 @@ const useDataServices = (filePath: string) => {
 
   const getJson = async () => {
     try {
-      const { data } = await mySky.getJSON(filePath);
+      const { data } = await mySky.getJSON(`${domain}/${filePath}`);
 
       return {
         data: data

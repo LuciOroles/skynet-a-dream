@@ -5,6 +5,7 @@ import useSvgDotsOnClick, { createCircle } from '../context/useSvgDotsOnClick';
 import useSVGContext from '../context/useSVGContext';
 import useGetDots, { Dot } from '../context/useGetDots';
 import { nanoid } from 'nanoid';
+import { Circle } from '@svgdotjs/svg.js';
 
 type Coords = {
   x: number;
@@ -22,7 +23,11 @@ export default function GraphGenerator({ path }: Props): ReactElement {
   const dots = useGetDots(path);
   const [dotCollection, setDotCollection] = useState<Dot[]>(dots);
   const [loading, setLoading] = useState<boolean>(false);
+  const [eraser, setEraser] = useState<boolean>(false);
   const { setJson } = useDataServices(path);
+  const removeDotById = (dotId: string) => {
+    setDotCollection((d) => d.filter((dot) => dot.id !== dotId));
+  };
 
   useEffect(() => {
     if (dots.length) {
@@ -31,18 +36,32 @@ export default function GraphGenerator({ path }: Props): ReactElement {
   }, [dots]);
 
   useEffect(() => {
+    const handleDotClick = (e: MouseEvent) => {
+      e.stopImmediatePropagation();
+      if (eraser) {
+        const id = (e.target as Circle).id;
+        if (typeof id === 'string') {
+          removeDotById(id);
+        }
+      }
+    };
+
     if (dotCollection.length) {
       drawCtx.clear();
       dotCollection.forEach((dot) => {
-        createCircle(drawCtx, {
-          radius: 7,
-          color: '#542aea',
-          startPos: { ...dot },
-          id: dot.id,
-        });
+        createCircle(
+          drawCtx,
+          {
+            radius: 7,
+            color: '#542aea',
+            startPos: { ...dot },
+            id: dot.id,
+          },
+          handleDotClick
+        );
       });
     }
-  }, [dotCollection, drawCtx]);
+  }, [dotCollection, drawCtx, eraser]);
 
   const handleAddCoords = (c: Coords) => {
     const newDot = {
@@ -63,16 +82,23 @@ export default function GraphGenerator({ path }: Props): ReactElement {
         dots: dotCollection,
       };
       await setJson(JSON.stringify(coords));
+      setLoading(false);
     } catch (error) {
       console.error(`unable to set the graph dots coors  ${error}`);
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
     <div>
       {loading && <div>Loading...</div>}
-      {!loading && <div id="canvas" ref={canvasRef} />}
+      {
+        <div
+          id="canvas"
+          ref={canvasRef}
+          style={{ display: loading ? 'none' : 'block' }}
+        />
+      }
       <div className="button-group">
         <button
           type="button"
@@ -82,6 +108,14 @@ export default function GraphGenerator({ path }: Props): ReactElement {
         >
           Send data
         </button>
+        <label>
+          Eraser
+          <input
+            type="checkbox"
+            defaultChecked={eraser}
+            onChange={() => setEraser(!eraser)}
+          />
+        </label>
       </div>
       <code>
         <h4>Dot collection:</h4>

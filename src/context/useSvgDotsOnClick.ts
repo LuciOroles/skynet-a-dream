@@ -22,7 +22,11 @@ type CircleConfig = {
     id: string;
 };
 
-export function createCircle(drawCtx: any, circleConfig: CircleConfig) {
+interface clickHandlerFn {
+    (e: MouseEvent): void
+}
+
+export function createCircle(drawCtx: any, circleConfig: CircleConfig, clickHandler: clickHandlerFn) {
     const { startPos } = circleConfig;
 
     var circle = drawCtx
@@ -30,10 +34,7 @@ export function createCircle(drawCtx: any, circleConfig: CircleConfig) {
         .attr({ fill: circleConfig.color, id: circleConfig.id });
 
     circle.move(startPos.x, startPos.y);
-    circle.click((e: MouseEvent) => {
-        e.stopImmediatePropagation();
-        console.log(e.target)
-    });
+    circle.click(clickHandler);
 
     return circle;
 }

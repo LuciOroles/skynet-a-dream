@@ -2,12 +2,6 @@
 import { useEffect, useState } from 'react';
 import useDataServices from './useDataServices';
 
-
-type Coords = {
-    x: number;
-    y: number;
-};
-
 export type Dot = {
     x: number;
     y: number;
@@ -40,7 +34,7 @@ const useGetDots = (path: string) => {
 
             getData();
         }
-    }, [getJson, path]);
+    }, [dots.length, getJson, path]);
 
     return dots;
 };
