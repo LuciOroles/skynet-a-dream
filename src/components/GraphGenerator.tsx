@@ -17,14 +17,38 @@ interface Props {
   dots?: Dot[];
 }
 
+const drawConfig = {
+  color: '#542aea',
+  radius: 7,
+};
+
+type Edge = [Dot, Dot];
+
+const drawEdgeTuple = (drawCtx: any, segement: Dot[]) => {
+  const [d1, d2] = segement;
+  const r = drawConfig.radius;
+  const line = drawCtx.line(d1.x + r, d1.y + r, d2.x + r, d2.y + r);
+  line.stroke({ color: drawConfig.color, width: 3, linecap: 'round' });
+  line.click((event: MouseEvent) => {
+    event.stopImmediatePropagation();
+  });
+};
+
 export default function GraphGenerator({ path }: Props): ReactElement {
   const canvasRef = createRef<HTMLDivElement>();
   const drawCtx = useSVGContext(canvasRef);
-  const dots = useGetDots(path);
+  const { dots, loading: loadingDots } = useGetDots(path);
   const [dotCollection, setDotCollection] = useState<Dot[]>(dots);
+  const [activeDots, setActiveDots] = useState<Dot[]>([]);
+  const [edges, setEdges] = useState<Edge[]>([]);
+
   const [loading, setLoading] = useState<boolean>(false);
   const [eraser, setEraser] = useState<boolean>(false);
+  const [connect, setConnect] = useState<boolean>(false);
+
   const { setJson } = useDataServices(path);
+  const dataLoading = loading || loadingDots;
+
   const removeDotById = (dotId: string) => {
     setDotCollection((d) => d.filter((dot) => dot.id !== dotId));
   };
@@ -37,23 +61,32 @@ export default function GraphGenerator({ path }: Props): ReactElement {
 
   useEffect(() => {
     const handleDotClick = (e: MouseEvent) => {
-      e.stopImmediatePropagation();
-      if (eraser) {
-        const id = (e.target as Circle).id;
-        if (typeof id === 'string') {
+      e.stopPropagation();
+      const id = (e.target as Circle).id;
+      if (typeof id === 'string') {
+        if (connect) {
+          const selDot = dotCollection.find((dot) => dot.id === id);
+          if (selDot) {
+            if (!activeDots.find((d) => d.id === id)) {
+              setActiveDots((d) => [...d, selDot]);
+            } // prevent re-selecting the same node;
+          }
+        } else if (eraser) {
           removeDotById(id);
         }
       }
     };
 
-    if (dotCollection.length) {
+    if (dotCollection.length || edges.length) {
       drawCtx.clear();
+      edges.forEach((eTuple) => {
+        drawEdgeTuple(drawCtx, eTuple);
+      });
       dotCollection.forEach((dot) => {
         createCircle(
           drawCtx,
           {
-            radius: 7,
-            color: '#542aea',
+            ...drawConfig,
             startPos: { ...dot },
             id: dot.id,
           },
@@ -61,7 +94,15 @@ export default function GraphGenerator({ path }: Props): ReactElement {
         );
       });
     }
-  }, [dotCollection, drawCtx, eraser]);
+  }, [activeDots, connect, dotCollection, drawCtx, edges, eraser]);
+
+  useEffect(() => {
+    if (activeDots.length === 2) {
+      const [d1, d2] = activeDots;
+      setEdges((e) => [...e, [d1, d2]]);
+      setActiveDots([]);
+    }
+  }, [drawCtx, activeDots]);
 
   const handleAddCoords = (c: Coords) => {
     const newDot = {
@@ -73,7 +114,7 @@ export default function GraphGenerator({ path }: Props): ReactElement {
     });
   };
 
-  useSvgDotsOnClick(drawCtx, { radius: 7, color: '#542aea' }, handleAddCoords);
+  useSvgDotsOnClick(drawCtx, drawConfig, handleAddCoords);
 
   const handleSendData = async () => {
     setLoading(true);
@@ -89,14 +130,18 @@ export default function GraphGenerator({ path }: Props): ReactElement {
     }
   };
 
+  const tempRender = (dot: Dot, i: number) => {
+    return <span key={i}>{JSON.stringify(dot)}</span>;
+  };
+
   return (
     <div>
-      {loading && <div>Loading...</div>}
+      {dataLoading && <div>Loading...</div>}
       {
         <div
           id="canvas"
           ref={canvasRef}
-          style={{ display: loading ? 'none' : 'block' }}
+          style={{ display: dataLoading ? 'none' : 'block' }}
         />
       }
       <div className="button-group">
@@ -116,12 +161,21 @@ export default function GraphGenerator({ path }: Props): ReactElement {
             onChange={() => setEraser(!eraser)}
           />
         </label>
+        <label>
+          Connect
+          <input
+            type="checkbox"
+            defaultChecked={connect}
+            onChange={() => setConnect(!connect)}
+          />
+        </label>
       </div>
       <code>
         <h4>Dot collection:</h4>
-        {dotCollection.map((dot, i) => {
-          return <span key={i}>{JSON.stringify(dot)}</span>;
-        })}
+        {dotCollection.map(tempRender)}
+
+        <h4>Active dots</h4>
+        {activeDots.map(tempRender)}
       </code>
     </div>
   );
