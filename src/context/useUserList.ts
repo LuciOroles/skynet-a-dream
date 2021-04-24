@@ -27,7 +27,6 @@ const useUserList = (endpoint: string) => {
         const req = new Request(endpoint, {
             method: 'GET',
             mode: 'cors',
-
         });
         setLoading(true);
 
