@@ -8,9 +8,15 @@ type Coords = {
     y: number;
 };
 
+export type Dot = {
+    x: number;
+    y: number;
+    id: string;
+}
+
 const useGetDots = (path: string) => {
     const { getJson } = useDataServices(path);
-    const [dots, setDots] = useState<Coords[]>([]);
+    const [dots, setDots] = useState<Dot[]>([]);
 
 
     useEffect(() => {

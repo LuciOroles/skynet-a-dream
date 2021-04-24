@@ -17,9 +17,10 @@ export default function Main(): ReactElement {
   return (
     <div>
       <h3>Main view</h3>
-      {siaUsers.map((user, i) => {
-        return <div key={i}>{user.id}</div>;
-      })}
+      {siaUsers &&
+        siaUsers.map((user, i) => {
+          return <div key={i}>{user.id}</div>;
+        })}
     </div>
   );
 }

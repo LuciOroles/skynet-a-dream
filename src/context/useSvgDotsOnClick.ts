@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 
 type Coords = {
@@ -18,6 +19,7 @@ type CircleConfig = {
     radius: number;
     color: string;
     startPos: Coords;
+    id: string;
 };
 
 export function createCircle(drawCtx: any, circleConfig: CircleConfig) {
@@ -25,8 +27,13 @@ export function createCircle(drawCtx: any, circleConfig: CircleConfig) {
 
     var circle = drawCtx
         .circle(circleConfig.radius * 2)
-        .attr({ fill: circleConfig.color });
+        .attr({ fill: circleConfig.color, id: circleConfig.id });
+
     circle.move(startPos.x, startPos.y);
+    circle.click((e: MouseEvent) => {
+        e.stopImmediatePropagation();
+        console.log(e.target)
+    });
 
     return circle;
 }

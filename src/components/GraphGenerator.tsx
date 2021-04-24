@@ -3,7 +3,8 @@ import React, { ReactElement, createRef, useState, useEffect } from 'react';
 import useDataServices from '../context/useDataServices';
 import useSvgDotsOnClick, { createCircle } from '../context/useSvgDotsOnClick';
 import useSVGContext from '../context/useSVGContext';
-import useGetDots from '../context/useGetDots';
+import useGetDots, { Dot } from '../context/useGetDots';
+import { nanoid } from 'nanoid';
 
 type Coords = {
   x: number;
@@ -12,14 +13,14 @@ type Coords = {
 
 interface Props {
   path: string;
-  dots?: Coords[];
+  dots?: Dot[];
 }
 
 export default function GraphGenerator({ path }: Props): ReactElement {
   const canvasRef = createRef<HTMLDivElement>();
   const drawCtx = useSVGContext(canvasRef);
-  const dots = useGetDots('sky1.json');
-  const [dotCollection, setDotCollection] = useState<Coords[]>(dots);
+  const dots = useGetDots(path);
+  const [dotCollection, setDotCollection] = useState<Dot[]>(dots);
   const [loading, setLoading] = useState<boolean>(false);
   const { setJson } = useDataServices(path);
 
@@ -37,14 +38,19 @@ export default function GraphGenerator({ path }: Props): ReactElement {
           radius: 7,
           color: '#542aea',
           startPos: { ...dot },
+          id: dot.id,
         });
       });
     }
   }, [dotCollection, drawCtx]);
 
   const handleAddCoords = (c: Coords) => {
+    const newDot = {
+      ...c,
+      id: nanoid(),
+    };
     setDotCollection((d) => {
-      return [...d, c];
+      return [...d, newDot];
     });
   };
 
