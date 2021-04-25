@@ -18,6 +18,7 @@ const useDataServices = (filePath: string) => {
   const domain = 'localhost';
   const setJson = async (input: Object) => {
 
+    if (!mySky) return;
 
     try {
       const { data, skylink } = await mySky.setJSON(`${domain}/${filePath}`, {
@@ -38,7 +39,9 @@ const useDataServices = (filePath: string) => {
   };
 
   const getJson = async () => {
+    if (!mySky) return;
     try {
+
       const { data } = await mySky.getJSON(`${domain}/${filePath}`);
 
       return {

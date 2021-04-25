@@ -17,14 +17,18 @@ const useGetDots = (path: string) => {
         const getData = async () => {
             setLoading(true);
             try {
-                const { data } = await getJson(path);
-                const d = data ? JSON.parse(data.data) : null;
-                if (d) {
-                    const d1 = JSON.parse(d);
-                    if (d1.dots) {
-                        setDots(d1.dots);
+                const response = await getJson(path);
+                if (response?.data) {
+                    const { data } = response;
+                    const d = data ? JSON.parse(data.data) : null;
+                    if (d) {
+                        const d1 = JSON.parse(d);
+                        if (d1.dots) {
+                            setDots(d1.dots);
+                        }
                     }
                 }
+
             } catch (error) {
                 setDots([]);
                 console.error(`unable to get the dots: ${error}`);
