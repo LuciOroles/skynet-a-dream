@@ -5,7 +5,7 @@ import GraphGenerator from './GraphGenerator';
 export default function GraphContainer(): ReactElement {
   return (
     <div>
-      <GraphGenerator path="sky1a.json" />
+      <GraphGenerator path="sky1a.json" mode="lines" />
     </div>
   );
 }

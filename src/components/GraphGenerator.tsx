@@ -14,7 +14,7 @@ type Coords = {
 
 interface Props {
   path: string;
-  dots?: Dot[];
+  mode: 'dots' | 'lines';
 }
 
 const drawConfig = {
@@ -34,7 +34,7 @@ const drawEdgeTuple = (drawCtx: any, segement: Dot[]) => {
   });
 };
 
-export default function GraphGenerator({ path }: Props): ReactElement {
+export default function GraphGenerator({ path, mode }: Props): ReactElement {
   const canvasRef = createRef<HTMLDivElement>();
   const drawCtx = useSVGContext(canvasRef);
   const { dots, loading: loadingDots } = useGetDots(path);
@@ -44,7 +44,6 @@ export default function GraphGenerator({ path }: Props): ReactElement {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [eraser, setEraser] = useState<boolean>(false);
-  const [connect, setConnect] = useState<boolean>(false);
 
   const { setJson } = useDataServices(path);
   const dataLoading = loading || loadingDots;
@@ -64,7 +63,7 @@ export default function GraphGenerator({ path }: Props): ReactElement {
       e.stopPropagation();
       const id = (e.target as Circle).id;
       if (typeof id === 'string') {
-        if (connect) {
+        if (mode === 'lines') {
           const selDot = dotCollection.find((dot) => dot.id === id);
           if (selDot) {
             if (!activeDots.find((d) => d.id === id)) {
@@ -94,7 +93,7 @@ export default function GraphGenerator({ path }: Props): ReactElement {
         );
       });
     }
-  }, [activeDots, connect, dotCollection, drawCtx, edges, eraser]);
+  }, [activeDots, dotCollection, drawCtx, edges, eraser, mode]);
 
   useEffect(() => {
     if (activeDots.length === 2) {
@@ -159,14 +158,6 @@ export default function GraphGenerator({ path }: Props): ReactElement {
             type="checkbox"
             defaultChecked={eraser}
             onChange={() => setEraser(!eraser)}
-          />
-        </label>
-        <label>
-          Connect
-          <input
-            type="checkbox"
-            defaultChecked={connect}
-            onChange={() => setConnect(!connect)}
           />
         </label>
       </div>
