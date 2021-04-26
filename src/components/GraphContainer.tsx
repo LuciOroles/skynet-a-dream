@@ -1,11 +1,19 @@
 import React, { ReactElement } from 'react';
+import EdgeConnector from './EdgeConnector';
+import VertexCreator from './VertexCreator';
 
-import GraphGenerator from './GraphGenerator';
+const useGraphType = () => {
+  return Math.random() < 0.5 ? 'vertex' : 'edge';
+};
 
 export default function GraphContainer(): ReactElement {
-  return (
-    <div>
-      <GraphGenerator path="sky1a.json" />
-    </div>
-  );
+  const graphType = useGraphType();
+
+  if (graphType === 'edge') {
+    return <EdgeConnector />;
+  }
+  if (graphType === 'vertex') {
+    return <VertexCreator />;
+  }
+  return <div>No operation to show</div>;
 }
