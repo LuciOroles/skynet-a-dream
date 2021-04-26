@@ -15,7 +15,8 @@ const withStringCheck = (fn: Function) => {
 const useDataServices = (filePath: string) => {
 
   const { mySky } = useSkyStatus();
-  const domain = 'localhost';
+  const domain =
+    window.location.hostname === 'localhost' ? 'localhost' : 'gdleibaoji.hns';
   const setJson = async (input: Object) => {
 
 
