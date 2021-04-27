@@ -3,7 +3,7 @@ import React, { ReactElement, createRef, useState, useEffect } from 'react';
 import useDataServices from '../context/useDataServices';
 import useSvgDotsOnClick, { createCircle } from '../context/useSvgDotsOnClick';
 import useSVGContext from '../context/useSVGContext';
-import useDots, { Dot } from '../context/useDots';
+import useDots, { Dot, Edge } from '../context/useGraphData';
 import { nanoid } from 'nanoid';
 import { Circle } from '@svgdotjs/svg.js';
 
@@ -22,8 +22,6 @@ const drawConfig = {
   radius: 7,
 };
 
-type Edge = [Dot, Dot];
-
 const drawEdgeTuple = (drawCtx: any, segement: Dot[]) => {
   const [d1, d2] = segement;
   const r = drawConfig.radius;
@@ -37,11 +35,12 @@ const drawEdgeTuple = (drawCtx: any, segement: Dot[]) => {
 export default function GraphGenerator({ path }: Props): ReactElement {
   const canvasRef = createRef<HTMLDivElement>();
   const drawCtx = useSVGContext(canvasRef);
-  const { dots, loading: loadingDots, error: dotsError } = useDots(path);
+  const { dots, edges, loading: loadingDots, error: dotsError } = useDots(path);
   const [dotCollection, setDotCollection] = useState<Dot[]>([]);
   const [activeDots, setActiveDots] = useState<Dot[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
+  const [activeEdges, setEdges] = useState<Edge[]>([]);
   const [initDots, setInitDots] = useState<boolean>(false);
+  const [initEdges, setInitEdges] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [eraser, setEraser] = useState<boolean>(false);
@@ -57,12 +56,17 @@ export default function GraphGenerator({ path }: Props): ReactElement {
   useEffect(() => {
     if (!initDots && Array.isArray(dots)) {
       if (dots.length) {
-        debugger;
         setInitDots(true);
         setDotCollection(dots);
       }
     }
-  }, [dots, initDots]);
+    if (!initEdges && Array.isArray(edges)) {
+      if (edges.length) {
+        setInitEdges(true);
+        setEdges(edges);
+      }
+    }
+  }, [initEdges, edges, dots, setInitDots, initDots]);
 
   useEffect(() => {
     const handleDotClick = (e: MouseEvent) => {
@@ -82,9 +86,9 @@ export default function GraphGenerator({ path }: Props): ReactElement {
       }
     };
 
-    if (dotCollection.length || edges.length) {
+    if (dotCollection.length || activeEdges.length) {
       drawCtx.clear();
-      edges.forEach((eTuple) => {
+      activeEdges.forEach((eTuple) => {
         drawEdgeTuple(drawCtx, eTuple);
       });
       dotCollection.forEach((dot) => {
@@ -99,7 +103,7 @@ export default function GraphGenerator({ path }: Props): ReactElement {
         );
       });
     }
-  }, [activeDots, connect, dotCollection, dots, drawCtx, edges, eraser]);
+  }, [activeDots, connect, dotCollection, dots, drawCtx, activeEdges, eraser]);
 
   useEffect(() => {
     if (activeDots.length === 2) {
@@ -121,11 +125,12 @@ export default function GraphGenerator({ path }: Props): ReactElement {
 
   useSvgDotsOnClick(drawCtx, drawConfig, handleAddCoords);
 
-  const handleSendData = async () => {
+  const handleSendGraphData = async () => {
     setLoading(true);
     try {
       const coords = {
         dots: dotCollection,
+        edges: activeEdges,
       };
       await setJson(coords);
       setLoading(false);
@@ -137,6 +142,18 @@ export default function GraphGenerator({ path }: Props): ReactElement {
 
   const tempRender = (dot: Dot, i: number) => {
     return <span key={i}>{JSON.stringify(dot)}</span>;
+  };
+
+  const EdgeRender = (e: Edge) => {
+    const d1: Dot = e[0];
+    const d2: Dot = e[0];
+
+    return (
+      <div style={{ border: '1px solid red' }}>
+        {tempRender(d1, 0)}
+        {tempRender(d2, 1)}
+      </div>
+    );
   };
 
   return (
@@ -152,7 +169,7 @@ export default function GraphGenerator({ path }: Props): ReactElement {
       <div className="button-group">
         <button
           type="button"
-          onClick={handleSendData}
+          onClick={handleSendGraphData}
           className="spaced-button"
           disabled={loading}
         >
@@ -180,8 +197,8 @@ export default function GraphGenerator({ path }: Props): ReactElement {
         <h4>Dot collection:</h4>
         {dotCollection.map(tempRender)}
 
-        <h4>Active dots</h4>
-        {activeDots.map(tempRender)}
+        <h4>Active edges</h4>
+        {activeEdges.map(EdgeRender)}
       </code>
     </div>
   );

@@ -10,11 +10,14 @@ export type Dot = {
     y: number;
     id: string;
 }
+export type Edge = [Dot, Dot];
 
 const useDots = (path: string) => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<Error | null>(null);
     const [dots, setDots] = useState<Dot[]>([]);
+    const [edges, setEdges] = useState<Edge[]>([]);
+
     const domain =
         window.location.hostname === 'localhost' ? 'localhost' : 'gdleibaoji.hns';
 
@@ -26,8 +29,12 @@ const useDots = (path: string) => {
             try {
                 const { data } = await mySky.getJSON(`${domain}/${path}`);
                 const parsedData = JSON.parse((data as UnparsedData).data);
+                debugger;
                 if (parsedData?.dots) {
                     setDots(parsedData.dots);
+                }
+                if (parsedData?.edges) {
+                    setEdges(parsedData.edges);
                 }
             } catch (error) {
                 console.error(`Unable to get the json data ${error}`);
@@ -43,6 +50,7 @@ const useDots = (path: string) => {
 
     return {
         dots,
+        edges,
         loading,
         error,
     };
