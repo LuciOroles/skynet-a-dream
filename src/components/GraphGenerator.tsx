@@ -2,10 +2,9 @@ import React, { ReactElement, createRef, useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import { Circle } from '@svgdotjs/svg.js';
 
-import useDataServices from '../context/useDataServices';
 import { createCircle } from '../context/useSvgDotsOnClick';
 import useSVGContext from '../context/useSVGContext';
-import useDots, { Dot, Edge } from '../context/useGraphData';
+import { Dot, Edge } from '../context/useGraphData';
 
 type Coords = {
   x: number;
@@ -13,8 +12,12 @@ type Coords = {
 };
 
 interface Props {
-  path: string;
   connect: boolean;
+  intialDots?: Dot[];
+  intialEdges?: Edge[];
+  setJson: Function;
+  loadingDots: boolean;
+  error: Error | null;
 }
 
 const drawConfig = {
@@ -22,15 +25,20 @@ const drawConfig = {
   radius: 7,
 };
 
-export default function GraphGenerator({ path, connect }: Props): ReactElement {
+export default function GraphGenerator({
+  connect,
+  intialDots,
+  intialEdges,
+  setJson,
+  error,
+  loadingDots,
+}: Props): ReactElement {
   const canvasRef = createRef<HTMLDivElement>();
   const drawCtx = useSVGContext(canvasRef);
-  const { dots, edges, loading: loadingDots, error } = useDots(path);
-  const [dotCollection, setDotCollection] = useState<Dot[]>([]);
+
+  const [dotCollection, setDotCollection] = useState<Dot[]>(intialDots || []);
   const [activeDots, setActiveDots] = useState<Dot[]>([]);
-  const [activeEdges, setActiveEdges] = useState<Edge[]>([]);
-  const [initDots, setInitDots] = useState<boolean>(false);
-  const [initEdges, setInitEdges] = useState<boolean>(false);
+  const [activeEdges, setActiveEdges] = useState<Edge[]>(intialEdges || []);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [eraser, setEraser] = useState<boolean>(false);
@@ -38,27 +46,24 @@ export default function GraphGenerator({ path, connect }: Props): ReactElement {
   const [svg, setSvg] = useState<SVGElement>();
   const [listener, setListener] = useState<number>(0);
 
-  const { setJson } = useDataServices(path);
   const dataLoading = loading || loadingDots;
+
+  useEffect(() => {
+    if (intialDots) {
+      setDotCollection(intialDots);
+    }
+    if (intialEdges) {
+      setActiveEdges(intialEdges);
+    }
+    return () => {
+      setDotCollection([]);
+      setActiveEdges([]);
+    };
+  }, [intialDots, intialEdges]);
 
   const removeDotById = (dotId: string) => {
     setDotCollection((d) => d.filter((dot) => dot.id !== dotId));
   };
-
-  useEffect(() => {
-    if (!initDots && Array.isArray(dots)) {
-      if (dots.length) {
-        setInitDots(true);
-        setDotCollection(dots);
-      }
-    }
-    if (!initEdges && Array.isArray(edges)) {
-      if (edges.length) {
-        setInitEdges(true);
-        setActiveEdges(edges);
-      }
-    }
-  }, [initEdges, edges, dots, setInitDots, initDots]);
 
   useEffect(() => {
     const handleDotClick = (e: MouseEvent) => {
@@ -99,6 +104,7 @@ export default function GraphGenerator({ path, connect }: Props): ReactElement {
     };
 
     if (dotCollection.length || activeEdges.length) {
+      debugger;
       drawCtx.clear();
       activeEdges.forEach((eTuple) => {
         drawEdgeTuple(drawCtx, eTuple);
@@ -115,7 +121,7 @@ export default function GraphGenerator({ path, connect }: Props): ReactElement {
         );
       });
     }
-  }, [activeDots, connect, dotCollection, dots, drawCtx, activeEdges, eraser]);
+  }, [activeDots, connect, dotCollection, drawCtx, activeEdges, eraser]);
 
   useEffect(() => {
     if (activeDots.length === 2) {
