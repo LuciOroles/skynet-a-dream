@@ -41,6 +41,7 @@ export default function GraphGenerator({ path }: Props): ReactElement {
   const [dotCollection, setDotCollection] = useState<Dot[]>([]);
   const [activeDots, setActiveDots] = useState<Dot[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
+  const [initDots, setInitDots] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [eraser, setEraser] = useState<boolean>(false);
@@ -52,6 +53,16 @@ export default function GraphGenerator({ path }: Props): ReactElement {
   const removeDotById = (dotId: string) => {
     setDotCollection((d) => d.filter((dot) => dot.id !== dotId));
   };
+
+  useEffect(() => {
+    if (!initDots && Array.isArray(dots)) {
+      if (dots.length) {
+        debugger;
+        setInitDots(true);
+        setDotCollection(dots);
+      }
+    }
+  }, [dots, initDots]);
 
   useEffect(() => {
     const handleDotClick = (e: MouseEvent) => {
@@ -70,9 +81,7 @@ export default function GraphGenerator({ path }: Props): ReactElement {
         }
       }
     };
-    if (Array.isArray(dots) && dots.length) {
-      setDotCollection(dots);
-    }
+
     if (dotCollection.length || edges.length) {
       drawCtx.clear();
       edges.forEach((eTuple) => {
@@ -137,7 +146,7 @@ export default function GraphGenerator({ path }: Props): ReactElement {
         <div
           id="canvas"
           ref={canvasRef}
-          // style={{ display: dataLoading ? 'none' : 'block' }}
+          style={{ display: dataLoading ? 'none' : 'block' }}
         />
       }
       <div className="button-group">
