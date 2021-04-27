@@ -3,7 +3,7 @@ import React, { ReactElement, createRef, useState, useEffect } from 'react';
 import useDataServices from '../context/useDataServices';
 import useSvgDotsOnClick, { createCircle } from '../context/useSvgDotsOnClick';
 import useSVGContext from '../context/useSVGContext';
-import useGetDots, { Dot } from '../context/useGetDots';
+import useDots, { Dot } from '../context/useDots';
 import { nanoid } from 'nanoid';
 import { Circle } from '@svgdotjs/svg.js';
 
@@ -37,8 +37,8 @@ const drawEdgeTuple = (drawCtx: any, segement: Dot[]) => {
 export default function GraphGenerator({ path }: Props): ReactElement {
   const canvasRef = createRef<HTMLDivElement>();
   const drawCtx = useSVGContext(canvasRef);
-  const { dots, loading: loadingDots } = useGetDots(path);
-  const [dotCollection, setDotCollection] = useState<Dot[]>(dots);
+  const { dots, loading: loadingDots, error: dotsError } = useDots(path);
+  const [dotCollection, setDotCollection] = useState<Dot[]>([]);
   const [activeDots, setActiveDots] = useState<Dot[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
 
@@ -52,12 +52,6 @@ export default function GraphGenerator({ path }: Props): ReactElement {
   const removeDotById = (dotId: string) => {
     setDotCollection((d) => d.filter((dot) => dot.id !== dotId));
   };
-
-  useEffect(() => {
-    if (dots.length) {
-      setDotCollection(dots);
-    }
-  }, [dots]);
 
   useEffect(() => {
     const handleDotClick = (e: MouseEvent) => {
@@ -76,7 +70,9 @@ export default function GraphGenerator({ path }: Props): ReactElement {
         }
       }
     };
-
+    if (Array.isArray(dots) && dots.length) {
+      setDotCollection(dots);
+    }
     if (dotCollection.length || edges.length) {
       drawCtx.clear();
       edges.forEach((eTuple) => {
@@ -94,7 +90,7 @@ export default function GraphGenerator({ path }: Props): ReactElement {
         );
       });
     }
-  }, [activeDots, connect, dotCollection, drawCtx, edges, eraser]);
+  }, [activeDots, connect, dotCollection, dots, drawCtx, edges, eraser]);
 
   useEffect(() => {
     if (activeDots.length === 2) {
@@ -122,7 +118,7 @@ export default function GraphGenerator({ path }: Props): ReactElement {
       const coords = {
         dots: dotCollection,
       };
-      await setJson(JSON.stringify(coords));
+      await setJson(coords);
       setLoading(false);
     } catch (error) {
       console.error(`unable to set the graph dots coors  ${error}`);
@@ -141,7 +137,7 @@ export default function GraphGenerator({ path }: Props): ReactElement {
         <div
           id="canvas"
           ref={canvasRef}
-          style={{ display: dataLoading ? 'none' : 'block' }}
+          // style={{ display: dataLoading ? 'none' : 'block' }}
         />
       }
       <div className="button-group">
@@ -151,8 +147,9 @@ export default function GraphGenerator({ path }: Props): ReactElement {
           className="spaced-button"
           disabled={loading}
         >
-          Send data
+          Send dots
         </button>
+
         <label>
           Eraser
           <input

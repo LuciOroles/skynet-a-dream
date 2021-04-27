@@ -2,7 +2,7 @@ import useSkyStatus from './useSkyStatus';
 
 
 const withStringCheck = (fn: Function) => {
-  return (path: string) => {
+  return (path: any) => {
     if (!path) {
       return {
         error: `no path provided ${path}`
