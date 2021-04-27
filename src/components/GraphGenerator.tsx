@@ -1,11 +1,11 @@
 import React, { ReactElement, createRef, useState, useEffect } from 'react';
-
-import useDataServices from '../context/useDataServices';
-import useSvgDotsOnClick, { createCircle } from '../context/useSvgDotsOnClick';
-import useSVGContext from '../context/useSVGContext';
-import useDots, { Dot, Edge } from '../context/useGraphData';
 import { nanoid } from 'nanoid';
 import { Circle } from '@svgdotjs/svg.js';
+
+import useDataServices from '../context/useDataServices';
+import { createCircle } from '../context/useSvgDotsOnClick';
+import useSVGContext from '../context/useSVGContext';
+import useDots, { Dot, Edge } from '../context/useGraphData';
 
 type Coords = {
   x: number;
@@ -14,7 +14,7 @@ type Coords = {
 
 interface Props {
   path: string;
-  dots?: Dot[];
+  connect: boolean;
 }
 
 const drawConfig = {
@@ -22,29 +22,21 @@ const drawConfig = {
   radius: 7,
 };
 
-const drawEdgeTuple = (drawCtx: any, segement: Dot[]) => {
-  const [d1, d2] = segement;
-  const r = drawConfig.radius;
-  const line = drawCtx.line(d1.x + r, d1.y + r, d2.x + r, d2.y + r);
-  line.stroke({ color: drawConfig.color, width: 3, linecap: 'round' });
-  line.click((event: MouseEvent) => {
-    event.stopImmediatePropagation();
-  });
-};
-
-export default function GraphGenerator({ path }: Props): ReactElement {
+export default function GraphGenerator({ path, connect }: Props): ReactElement {
   const canvasRef = createRef<HTMLDivElement>();
   const drawCtx = useSVGContext(canvasRef);
-  const { dots, edges, loading: loadingDots, error: dotsError } = useDots(path);
+  const { dots, edges, loading: loadingDots, error } = useDots(path);
   const [dotCollection, setDotCollection] = useState<Dot[]>([]);
   const [activeDots, setActiveDots] = useState<Dot[]>([]);
-  const [activeEdges, setEdges] = useState<Edge[]>([]);
+  const [activeEdges, setActiveEdges] = useState<Edge[]>([]);
   const [initDots, setInitDots] = useState<boolean>(false);
   const [initEdges, setInitEdges] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [eraser, setEraser] = useState<boolean>(false);
-  const [connect, setConnect] = useState<boolean>(false);
+
+  const [svg, setSvg] = useState<SVGElement>();
+  const [listener, setListener] = useState<number>(0);
 
   const { setJson } = useDataServices(path);
   const dataLoading = loading || loadingDots;
@@ -63,7 +55,7 @@ export default function GraphGenerator({ path }: Props): ReactElement {
     if (!initEdges && Array.isArray(edges)) {
       if (edges.length) {
         setInitEdges(true);
-        setEdges(edges);
+        setActiveEdges(edges);
       }
     }
   }, [initEdges, edges, dots, setInitDots, initDots]);
@@ -84,6 +76,26 @@ export default function GraphGenerator({ path }: Props): ReactElement {
           removeDotById(id);
         }
       }
+    };
+
+    const drawEdgeTuple = (drawCtx: any, segement: Dot[]) => {
+      const [d1, d2] = segement;
+      const r = drawConfig.radius;
+      const line = drawCtx.line(d1.x + r, d1.y + r, d2.x + r, d2.y + r);
+      line.stroke({ color: drawConfig.color, width: 3, linecap: 'round' });
+      line.click((event: MouseEvent) => {
+        event.stopImmediatePropagation();
+        if (eraser) {
+          setActiveEdges((edges) => {
+            return edges.filter((edge) => {
+              const [de1, de2] = edge;
+              const found =
+                (de1 === d1 || de2 === d1) && (de1 === d2 || de2 === d2);
+              return !found;
+            });
+          });
+        }
+      });
     };
 
     if (dotCollection.length || activeEdges.length) {
@@ -108,22 +120,41 @@ export default function GraphGenerator({ path }: Props): ReactElement {
   useEffect(() => {
     if (activeDots.length === 2) {
       const [d1, d2] = activeDots;
-      setEdges((e) => [...e, [d1, d2]]);
+      setActiveEdges((e) => [...e, [d1, d2]]);
       setActiveDots([]);
     }
   }, [drawCtx, activeDots]);
 
-  const handleAddCoords = (c: Coords) => {
-    const newDot = {
-      ...c,
-      id: nanoid(),
+  useEffect(() => {
+    const handleAddingDots = (c: Coords) => {
+      const newDot = {
+        ...c,
+        id: nanoid(),
+      };
+      setDotCollection((d) => {
+        return [...d, newDot];
+      });
     };
-    setDotCollection((d) => {
-      return [...d, newDot];
-    });
-  };
 
-  useSvgDotsOnClick(drawCtx, drawConfig, handleAddCoords);
+    const svgS = document.querySelector('#canvas>svg') as SVGElement;
+    if (svgS && !svg) setSvg(svgS);
+    if (svg && listener === 0) {
+      setListener(listener + 1);
+      svg.addEventListener('click', (e: MouseEvent) => {
+        if (connect) return;
+        const target = e.target as SVGElement;
+        var rect = target.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        const coords: Coords = {
+          x,
+          y,
+        };
+
+        handleAddingDots(coords);
+      });
+    }
+  }, [connect, listener, setDotCollection, svg]);
 
   const handleSendGraphData = async () => {
     setLoading(true);
@@ -140,21 +171,9 @@ export default function GraphGenerator({ path }: Props): ReactElement {
     }
   };
 
-  const tempRender = (dot: Dot, i: number) => {
-    return <span key={i}>{JSON.stringify(dot)}</span>;
-  };
-
-  const EdgeRender = (e: Edge) => {
-    const d1: Dot = e[0];
-    const d2: Dot = e[0];
-
-    return (
-      <div style={{ border: '1px solid red' }}>
-        {tempRender(d1, 0)}
-        {tempRender(d2, 1)}
-      </div>
-    );
-  };
+  if (error) {
+    return <div>Unable to get data!</div>;
+  }
 
   return (
     <div>
@@ -184,22 +203,7 @@ export default function GraphGenerator({ path }: Props): ReactElement {
             onChange={() => setEraser(!eraser)}
           />
         </label>
-        <label>
-          Connect
-          <input
-            type="checkbox"
-            defaultChecked={connect}
-            onChange={() => setConnect(!connect)}
-          />
-        </label>
       </div>
-      <code>
-        <h4>Dot collection:</h4>
-        {dotCollection.map(tempRender)}
-
-        <h4>Active edges</h4>
-        {activeEdges.map(EdgeRender)}
-      </code>
     </div>
   );
 }
