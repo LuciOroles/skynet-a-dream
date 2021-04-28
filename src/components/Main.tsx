@@ -1,26 +1,50 @@
-import React, { ReactElement, useEffect, useState } from 'react';
-import useUserList, { SiaUser } from '../context/useUserList';
-const endpoint1 = process.env.REACT_APP_USERS1 as string;
+import React, { ChangeEvent, ReactElement, useState } from 'react';
+import { Container, Form, Grid, Button } from 'semantic-ui-react';
 
 export default function Main(): ReactElement {
-  const [siaUsers, setSiaUser] = useState<SiaUser[]>([]);
-  const { data, error, loading } = useUserList(endpoint1);
+  const [userId, setUserId] = useState<string>('');
+  const [gameId, setGameId] = useState<string>('');
 
-  useEffect(() => {
-    if (data) {
-      setSiaUser(data.siaUsers);
-    }
-  }, [data]);
+  const handleInputChange = (fn: Function) => {
+    return (e: ChangeEvent) => {
+      const target = e.target as HTMLInputElement;
+      fn(target.value);
+    };
+  };
 
-  if (loading) return <div>Loading ...</div>;
-  if (error) return <div>Some error occured!</div>;
+  const handleUserChange = handleInputChange(setUserId);
+  const handleGameIdChange = handleInputChange(setGameId);
+  const validInput = userId && gameId;
+
   return (
-    <div>
-      <h3>Main view</h3>
-      {siaUsers &&
-        siaUsers.map((user, i) => {
-          return <div key={i}>{user.id}</div>;
-        })}
-    </div>
+    <Container>
+      <Grid columns={2} divided>
+        <Grid.Row>
+          <Grid.Column>
+            <Form>
+              <Form.Field>
+                <label>Partner public ID:</label>
+                <input
+                  value={userId}
+                  placeholder="public id"
+                  onChange={handleUserChange}
+                />
+              </Form.Field>
+              <Form.Field>
+                <label>Game name</label>
+                <input
+                  value={gameId}
+                  placeholder="Game name"
+                  onChange={handleGameIdChange}
+                />
+              </Form.Field>
+              <Button type="button" disabled={!validInput} primary>
+                Deploy
+              </Button>
+            </Form>
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
+    </Container>
   );
 }
