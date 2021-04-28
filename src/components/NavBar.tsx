@@ -6,16 +6,10 @@ export default function NavBar(): ReactElement {
     <nav>
       <ul className="listMenu">
         <li>
-          <Link to="/">Main </Link>
+          <Link to="/">Init </Link>
         </li>
         <li>
           <Link to="/graph">Graph</Link>
-        </li>
-        <li>
-          <Link to="/upload">Upload</Link>
-        </li>
-        <li>
-          <Link to="/dev">Debuger area</Link>
         </li>
       </ul>
     </nav>
