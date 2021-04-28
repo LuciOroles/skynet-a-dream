@@ -5,16 +5,15 @@ import React, {
   useState,
 } from 'react';
 import { Container, Form, Grid, Button, Select } from 'semantic-ui-react';
+import useCreateGame from '../context/useCreateGame';
 
-const Options = [
-  { key: 'b', value: 'builder', text: 'Bulider' },
-  { key: 'c', value: 'connect', text: 'Connector' },
-];
+export type Roles = 'build' | 'connect';
 
 export default function Main(): ReactElement {
   const [userId, setUserId] = useState<string>('');
   const [gameId, setGameId] = useState<string>('');
-  const [role, setRole] = useState<string>('');
+  const [role, setRole] = useState<Roles | string>('');
+  const createGame = useCreateGame();
 
   const handleInputChange = (fn: Function) => {
     return (e: ChangeEvent) => {
@@ -22,10 +21,25 @@ export default function Main(): ReactElement {
       fn(target.value);
     };
   };
+  const Options = [
+    { key: 'b', value: 'build', text: 'Bulider' },
+    { key: 'c', value: 'connect', text: 'Connector' },
+  ];
 
   const handleUserChange = handleInputChange(setUserId);
   const handleGameIdChange = handleInputChange(setGameId);
   const validInput = userId && gameId && role;
+  console.log(userId, gameId, role);
+  const handleStartGame = async () => {
+    if (userId && gameId && ['build', 'connect'].indexOf(role) > -1) {
+      const r = await createGame({
+        userId,
+        gameId,
+        role: role as Roles,
+      });
+      console.log(r);
+    }
+  };
 
   return (
     <Container>
@@ -51,17 +65,29 @@ export default function Main(): ReactElement {
               </Form.Field>
               <Form.Field>
                 <label>Select your role:</label>
-                <Select
-                  placeholder="role"
-                  options={Options}
+                <select
                   value={role}
                   onChange={(e: SyntheticEvent) => {
                     const t = e.target as HTMLSelectElement;
+                    debugger;
                     setRole(t.value);
                   }}
-                />
+                >
+                  {Options.map((o) => {
+                    return (
+                      <option value={o.value} key={o.key}>
+                        {o.text}
+                      </option>
+                    );
+                  })}
+                </select>
               </Form.Field>
-              <Button type="button" disabled={!validInput} primary>
+              <Button
+                type="button"
+                disabled={!validInput}
+                primary
+                onClick={handleStartGame}
+              >
                 Start game
               </Button>
             </Form>

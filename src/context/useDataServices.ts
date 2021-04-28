@@ -24,7 +24,7 @@ const useDataServices = (filePath: string) => {
       const { data, skylink } = await mySky.setJSON(`${domain}/${filePath}`, {
         data: JSON.stringify(input),
       });
-      debugger;
+
       return {
         done: true,
         data,
