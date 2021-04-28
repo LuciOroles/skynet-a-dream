@@ -6,7 +6,9 @@ const AppHeader = () => {
   return (
     <header className="header">
       <div className="header-left">
-        <Header as="h1">Skynet map builder</Header>
+        <Header as="h1" id="title">
+          Skynet map builder
+        </Header>
       </div>
 
       <Avatar />

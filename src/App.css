@@ -15,8 +15,9 @@
   align-items: center;
   justify-content: center;
 }
-.header-left h1 {
+.header-left #title {
   color: #58b560;
+  text-transform: uppercase;
 }
 
 .header-right {
