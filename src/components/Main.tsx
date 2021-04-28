@@ -1,9 +1,20 @@
-import React, { ChangeEvent, ReactElement, useState } from 'react';
-import { Container, Form, Grid, Button } from 'semantic-ui-react';
+import React, {
+  ChangeEvent,
+  ReactElement,
+  SyntheticEvent,
+  useState,
+} from 'react';
+import { Container, Form, Grid, Button, Select } from 'semantic-ui-react';
+
+const Options = [
+  { key: 'b', value: 'builder', text: 'Bulider' },
+  { key: 'c', value: 'connect', text: 'Connector' },
+];
 
 export default function Main(): ReactElement {
   const [userId, setUserId] = useState<string>('');
   const [gameId, setGameId] = useState<string>('');
+  const [role, setRole] = useState<string>('');
 
   const handleInputChange = (fn: Function) => {
     return (e: ChangeEvent) => {
@@ -14,7 +25,7 @@ export default function Main(): ReactElement {
 
   const handleUserChange = handleInputChange(setUserId);
   const handleGameIdChange = handleInputChange(setGameId);
-  const validInput = userId && gameId;
+  const validInput = userId && gameId && role;
 
   return (
     <Container>
@@ -38,8 +49,20 @@ export default function Main(): ReactElement {
                   onChange={handleGameIdChange}
                 />
               </Form.Field>
+              <Form.Field>
+                <label>Select your role:</label>
+                <Select
+                  placeholder="role"
+                  options={Options}
+                  value={role}
+                  onChange={(e: SyntheticEvent) => {
+                    const t = e.target as HTMLSelectElement;
+                    setRole(t.value);
+                  }}
+                />
+              </Form.Field>
               <Button type="button" disabled={!validInput} primary>
-                Deploy
+                Start game
               </Button>
             </Form>
           </Grid.Column>
