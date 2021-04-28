@@ -9,14 +9,22 @@
 }
 
 .header-left {
-  flex: 8;
+  flex: 6;
 }
 
 .header-right {
-  flex: 1;
+  flex: 4;
+  overflow: hidden;
+
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+.userId {
+  max-width: 160px;
   overflow: hidden;
 }
-
 .listMenu {
   list-style: none;
   display: flex;

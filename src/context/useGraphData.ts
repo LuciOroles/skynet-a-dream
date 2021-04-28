@@ -29,7 +29,7 @@ const useDots = (path: string) => {
             try {
                 const { data } = await mySky.getJSON(`${domain}/${path}`);
                 const parsedData = JSON.parse((data as UnparsedData).data);
-                debugger;
+
                 if (parsedData?.dots) {
                     setDots(parsedData.dots);
                 }

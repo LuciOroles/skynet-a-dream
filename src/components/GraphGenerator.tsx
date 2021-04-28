@@ -5,6 +5,7 @@ import { Circle } from '@svgdotjs/svg.js';
 import { createCircle } from '../context/useSvgDotsOnClick';
 import useSVGContext from '../context/useSVGContext';
 import { Dot, Edge } from '../context/useGraphData';
+import { Button } from 'semantic-ui-react';
 
 type Coords = {
   x: number;
@@ -104,7 +105,6 @@ export default function GraphGenerator({
     };
 
     if (dotCollection.length || activeEdges.length) {
-      debugger;
       drawCtx.clear();
       activeEdges.forEach((eTuple) => {
         drawEdgeTuple(drawCtx, eTuple);
@@ -192,14 +192,14 @@ export default function GraphGenerator({
         />
       }
       <div className="button-group">
-        <button
+        <Button
           type="button"
           onClick={handleSendGraphData}
-          className="spaced-button"
+          primary
           disabled={loading}
         >
-          Send dots
-        </button>
+          Send Data
+        </Button>
 
         <label>
           Eraser

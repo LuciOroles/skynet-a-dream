@@ -8,7 +8,7 @@ const Avatar = () => {
 
   return (
     <div className="header-right">
-      {userID}
+      <div className="userId">{userID}</div>
       <Login />
     </div>
   );

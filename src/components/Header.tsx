@@ -1,14 +1,17 @@
 import React from 'react';
 import Avatar from '../components/Avatar';
+import { Header } from 'semantic-ui-react';
 
-const Header = () => {
+const AppHeader = () => {
   return (
     <header className="header">
-      <div className="header-left">Skynet map builder</div>
+      <div className="header-left">
+        <Header as="h1">Skynet map builder</Header>
+      </div>
 
       <Avatar />
     </header>
   );
 };
 
-export default Header;
+export default AppHeader;
