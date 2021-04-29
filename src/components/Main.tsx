@@ -41,6 +41,8 @@ export default function Main(): ReactElement {
     }
   };
 
+  // const getGraphData = ()
+
   return (
     <Container>
       <Grid columns={2} divided>
@@ -69,7 +71,7 @@ export default function Main(): ReactElement {
                   value={role}
                   onChange={(e: SyntheticEvent) => {
                     const t = e.target as HTMLSelectElement;
-                    debugger;
+
                     setRole(t.value);
                   }}
                 >

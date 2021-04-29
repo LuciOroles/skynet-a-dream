@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import useSkyStatus from './useSkyStatus';
 import { useAppContext } from './index';
 
@@ -13,49 +13,54 @@ export type Dot = {
 }
 export type Edge = [Dot, Dot];
 
-const useDots = (path: string) => {
-    const [loading, setLoading] = useState<boolean>(false);
+export type ParsedData = {
+    role: string,
+    userId: string,
+    dots?: Dot[],
+    edges?: Edge[],
+}
+type Roles = 'build' | 'connect';
+
+const useGraphData = () => {
+
     const [error, setError] = useState<Error | null>(null);
     const [dots, setDots] = useState<Dot[]>([]);
+    const [role, setRole] = useState<Roles | string>('');
+
     const [edges, setEdges] = useState<Edge[]>([]);
     const { state } = useAppContext();
     const { domain } = state;
 
     const { mySky } = useSkyStatus();
 
-    useEffect(() => {
-        const getDots = async () => {
-            setLoading(true);
-            try {
-                const { data } = await mySky.getJSON(`${domain}/${path}`);
-                const parsedData = JSON.parse((data as UnparsedData).data);
-                debugger;
+    return async (path: string) => {
+        try {
+            const { data } = await mySky.getJSON(`${domain}/${path}`);
+            const parsedData: ParsedData = JSON.parse((data as UnparsedData).data);
+            debugger;
 
-                if (parsedData?.dots) {
-                    setDots(parsedData.dots);
-                }
-                if (parsedData?.edges) {
-                    setEdges(parsedData.edges);
-                }
-            } catch (error) {
-                console.error(`Unable to get the json data ${error}`);
-                setError(error);
+            if (parsedData?.dots) {
+                setDots(parsedData.dots);
             }
-            setLoading(false);
-        };
-        if (mySky) {
-            getDots();
+            if (parsedData?.edges) {
+                setEdges(parsedData.edges);
+            }
+            setRole(parsedData.role);
+        } catch (error) {
+            console.error(`Unable to get the json data ${error}`);
+            setError(error);
         }
-        return () => { };
-    }, [domain, path, mySky]);
+        return {
+            dots,
+            edges,
+            role,
+            error,
+        };
 
-    return {
-        dots,
-        edges,
-        loading,
-        error,
-    };
+    }
+
+
 };
 
 
-export default useDots;
+export default useGraphData;
