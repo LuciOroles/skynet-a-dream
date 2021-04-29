@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import useSkyStatus from './useSkyStatus';
+import { useAppContext } from './index';
 
 
 type UnparsedData = {
@@ -17,9 +18,8 @@ const useDots = (path: string) => {
     const [error, setError] = useState<Error | null>(null);
     const [dots, setDots] = useState<Dot[]>([]);
     const [edges, setEdges] = useState<Edge[]>([]);
-
-    const domain =
-        window.location.hostname === 'localhost' ? 'localhost' : 'gdleibaoji.hns';
+    const { state } = useAppContext();
+    const { domain } = state;
 
     const { mySky } = useSkyStatus();
 
@@ -29,6 +29,7 @@ const useDots = (path: string) => {
             try {
                 const { data } = await mySky.getJSON(`${domain}/${path}`);
                 const parsedData = JSON.parse((data as UnparsedData).data);
+                debugger;
 
                 if (parsedData?.dots) {
                     setDots(parsedData.dots);
