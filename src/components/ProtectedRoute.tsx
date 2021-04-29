@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Route, Redirect } from 'react-router-dom';
-import { useLogin } from '../context';
+import { useAppContext } from '../context';
 
 export interface IProtectedRouteProps {
   path: string;
@@ -14,7 +14,7 @@ export default function ProtectedRoute({
   exact,
   ...rest
 }: IProtectedRouteProps) {
-  const { state } = useLogin();
+  const { state } = useAppContext();
 
   if (!state.logged) {
     return <Redirect to="/" />;

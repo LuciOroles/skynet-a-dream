@@ -10,6 +10,7 @@ import NavBar from './components/NavBar';
 import Main from './components/Main';
 import ProtectedRoute from './components/ProtectedRoute';
 import GraphContainer from './components/GraphContainer';
+import Intro from './components/Intro';
 
 function App() {
   return (
@@ -21,7 +22,8 @@ function App() {
           <Switch>
             <ProtectedRoute exact path="/graph" component={GraphContainer} />
 
-            <Route path="/" component={Main} />
+            <ProtectedRoute exact path="/connect" component={Main} />
+            <Route path="/" component={Intro} />
           </Switch>
         </Router>
       </LoginProvider>

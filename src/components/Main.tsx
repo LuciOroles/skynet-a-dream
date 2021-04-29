@@ -4,7 +4,7 @@ import React, {
   SyntheticEvent,
   useState,
 } from 'react';
-import { Container, Form, Grid, Button, Select } from 'semantic-ui-react';
+import { Container, Form, Grid, Button } from 'semantic-ui-react';
 import useCreateGame from '../context/useCreateGame';
 
 export type Roles = 'build' | 'connect';
@@ -29,7 +29,7 @@ export default function Main(): ReactElement {
   const handleUserChange = handleInputChange(setUserId);
   const handleGameIdChange = handleInputChange(setGameId);
   const validInput = userId && gameId && role;
-  console.log(userId, gameId, role);
+
   const handleStartGame = async () => {
     if (userId && gameId && ['build', 'connect'].indexOf(role) > -1) {
       const r = await createGame({
@@ -89,6 +89,10 @@ export default function Main(): ReactElement {
                 onClick={handleStartGame}
               >
                 Start game
+              </Button>
+
+              <Button type="button" disabled={!gameId} primary>
+                Connect to game
               </Button>
             </Form>
           </Grid.Column>

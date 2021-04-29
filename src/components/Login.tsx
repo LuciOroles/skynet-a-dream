@@ -1,13 +1,12 @@
 import React, { useEffect } from 'react';
 
 import useSkyStatus from '../context/useSkyStatus';
-import { useLogin } from '../context';
+import { useAppContext } from '../context';
 import { Button } from 'semantic-ui-react';
 
 const Login = () => {
-  const { state } = useLogin();
+  const { state, dispatch } = useAppContext();
   const { mySky } = useSkyStatus();
-  const { dispatch } = useLogin();
 
   const handleClick = async () => {
     if (!mySky) return;

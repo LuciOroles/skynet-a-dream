@@ -77,3 +77,8 @@
 #canvas > svg {
   box-shadow: 2px 2px 1px #444, -2px -2px 1px #443;
 }
+
+.introHeader {
+  justify-content: center;
+  display: flex;
+}

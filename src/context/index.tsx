@@ -23,6 +23,7 @@ type State = {
   userID?: string;
   gameId?: string;
   partenerId?: string;
+  domain: string;
 };
 type LoginProviderProps = { children: React.ReactNode };
 
@@ -45,7 +46,12 @@ function loginReducer(state: State, action: Action) {
 }
 
 function LoginProvider({ children }: LoginProviderProps) {
-  const [state, dispatch] = React.useReducer(loginReducer, { logged: false });
+  const domain =
+    window.location.hostname === 'localhost' ? 'localhost' : 'gdleibaoji.hns';
+  const [state, dispatch] = React.useReducer(loginReducer, {
+    logged: false,
+    domain,
+  });
   const value = {
     state,
     dispatch,
@@ -58,7 +64,7 @@ function LoginProvider({ children }: LoginProviderProps) {
   );
 }
 
-function useLogin() {
+function useAppContext() {
   const context = React.useContext(LoginStateContext);
 
   if (context === undefined) {
@@ -68,4 +74,4 @@ function useLogin() {
   return context;
 }
 
-export { LoginProvider, useLogin };
+export { LoginProvider, useAppContext };

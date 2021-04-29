@@ -1,10 +1,10 @@
 import React from 'react';
-import { useLogin } from '../context';
+import { useAppContext } from '../context';
 import Login from './Login';
 import { Card } from 'semantic-ui-react';
 
 const Avatar = () => {
-  const { state } = useLogin();
+  const { state } = useAppContext();
   const userID = state.logged ? state?.userID : null;
 
   return (
