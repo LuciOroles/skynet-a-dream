@@ -6,6 +6,8 @@ import React, {
 } from 'react';
 import { Container, Form, Grid, Button } from 'semantic-ui-react';
 import useCreateGame from '../context/useCreateGame';
+import useGraphData, { Dot, Edge } from '../context/useGraphData';
+import GraphContainer from './GraphContainer';
 
 export type Roles = 'build' | 'connect';
 
@@ -13,7 +15,14 @@ export default function Main(): ReactElement {
   const [userId, setUserId] = useState<string>('');
   const [gameId, setGameId] = useState<string>('');
   const [role, setRole] = useState<Roles | string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [dots, setDots] = useState<Dot[] | null>([]);
+
+  const [edges, setEdges] = useState<Edge[] | null>([]);
+
   const createGame = useCreateGame();
+  const getGraphData = useGraphData();
 
   const handleInputChange = (fn: Function) => {
     return (e: ChangeEvent) => {
@@ -41,7 +50,22 @@ export default function Main(): ReactElement {
     }
   };
 
-  // const getGraphData = ()
+  const handleGetData = async () => {
+    setLoading(true);
+    const result = await getGraphData('game1.json');
+
+    setDots(result.dots);
+    setEdges(result.edges);
+    setError(result.error);
+
+    debugger;
+
+    setLoading(false);
+  };
+
+  if (loading) {
+    return <div>Loading ... </div>;
+  }
 
   return (
     <Container>
@@ -75,6 +99,7 @@ export default function Main(): ReactElement {
                     setRole(t.value);
                   }}
                 >
+                  <option value="">Pick one</option>
                   {Options.map((o) => {
                     return (
                       <option value={o.value} key={o.key}>
@@ -93,13 +118,21 @@ export default function Main(): ReactElement {
                 Start game
               </Button>
 
-              <Button type="button" disabled={!gameId} primary>
+              <Button
+                type="button"
+                disabled={!gameId}
+                primary
+                onClick={handleGetData}
+              >
                 Connect to game
               </Button>
             </Form>
           </Grid.Column>
         </Grid.Row>
       </Grid>
+      {edges && dots && role && (
+        <GraphContainer edges={edges} dots={dots} role={role} />
+      )}
     </Container>
   );
 }

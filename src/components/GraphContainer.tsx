@@ -1,24 +1,26 @@
 import React, { ReactElement, useState } from 'react';
-import useGraphData from '../context/useGraphData';
-import useDataServices from '../context/useDataServices';
-import GraphGenerator from './GraphGenerator';
+import { Dot, Edge } from '../context/useGraphData';
+
 import { Button } from 'semantic-ui-react';
 
-export default function GraphContainer(): ReactElement {
-  const [connect, setConnect] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const { setJson } = useDataServices('sky1a.json');
-  const getDots = useGraphData();
+type Props = {
+  role: string;
 
-  const handleGetData = async () => {
-    setLoading(true);
-    const { role, dots, edges, error } = await getDots('game1.json');
-    setLoading(false);
-  };
+  dots?: Dot[];
+  edges?: Edge[];
+};
+
+export default function GraphContainer({
+  role,
+  dots,
+  edges,
+}: Props): ReactElement {
+  const [connect, setConnect] = useState<boolean>(false);
+
+  // const { setJson } = useDataServices('sky1a.json');
 
   return (
     <React.Fragment>
-      <Button onClick={handleGetData}>Get Data</Button>
       <label>
         Connect Dots
         <input
