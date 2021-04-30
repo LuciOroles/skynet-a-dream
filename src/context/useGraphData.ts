@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import useSkyStatus from './useSkyStatus';
 import { useAppContext } from './index';
 
@@ -12,22 +11,18 @@ export type Dot = {
     id: string;
 }
 export type Edge = [Dot, Dot];
-
+type Roles = 'build' | 'connect';
 export type ParsedData = {
-    role: string,
+    role: Roles,
     userId: string,
     dots?: Dot[],
     edges?: Edge[],
 }
-type Roles = 'build' | 'connect';
+
 
 const useGraphData = () => {
 
-    const [error, setError] = useState<Error | null>(null);
-    const [dots, setDots] = useState<Dot[]>([]);
-    const [role, setRole] = useState<Roles | string>('');
 
-    const [edges, setEdges] = useState<Edge[]>([]);
     const { state } = useAppContext();
     const { domain } = state;
 
@@ -37,25 +32,24 @@ const useGraphData = () => {
         try {
             const { data } = await mySky.getJSON(`${domain}/${path}`);
             const parsedData: ParsedData = JSON.parse((data as UnparsedData).data);
-            debugger;
 
-            if (parsedData?.dots) {
-                setDots(parsedData.dots);
-            }
-            if (parsedData?.edges) {
-                setEdges(parsedData.edges);
-            }
-            setRole(parsedData.role);
+
+            return {
+                dots: parsedData.dots as Dot[],
+                edges: parsedData?.edges as Edge[],
+                role: parsedData.role,
+                error: null
+            };
+
         } catch (error) {
             console.error(`Unable to get the json data ${error}`);
-            setError(error);
+            return {
+                dots: null,
+                edges: null,
+                role: null,
+                error,
+            }
         }
-        return {
-            dots,
-            edges,
-            role,
-            error,
-        };
 
     }
 
