@@ -7,10 +7,16 @@ import React, {
 import { Container, Form, Grid, Button } from 'semantic-ui-react';
 import { Dimmer, Loader, Segment } from 'semantic-ui-react';
 import useCreateGame from '../context/useCreateGame';
-import useGraphData, { Dot, Edge } from '../context/useGraphData';
+import useGraphData, {
+  Dot,
+  Edge,
+  UnparsedData,
+  Roles,
+  ParsedData,
+} from '../context/useGraphData';
 import GraphGenerator from './GraphGenerator';
-
-export type Roles = 'build' | 'connect';
+import useSkyStatus from '../context/useSkyStatus';
+import { useAppContext } from '../context/index';
 
 export default function Main(): ReactElement {
   const [userId, setUserId] = useState<string>('');
@@ -24,6 +30,8 @@ export default function Main(): ReactElement {
   const [authorId, setAuthorId] = useState<string>('');
 
   const [userRole, setUserRole] = useState<Roles | ''>('');
+  const { client } = useSkyStatus();
+  const { state } = useAppContext();
 
   const validInput = userId && gameId && role;
   const validGraph =
@@ -80,6 +88,24 @@ export default function Main(): ReactElement {
       setError(result);
     }
     setLoading(false);
+  };
+
+  const getForSecondUser = async () => {
+    try {
+      const { data } = await client.file.getJSON(
+        authorId,
+        `${state.domain}/${gameId}.json`
+      );
+      const parsedData: ParsedData = JSON.parse((data as UnparsedData).data);
+      debugger;
+      if (parsedData.role === 'connect') {
+        setDots(parsedData.dots);
+      } else {
+        setEdges(parsedData.edges);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -142,6 +168,15 @@ export default function Main(): ReactElement {
                   onClick={handleGetData}
                 >
                   Connect to game
+                </Button>
+
+                <Button
+                  type="button"
+                  disabled={!authorId}
+                  primary
+                  onClick={getForSecondUser}
+                >
+                  Get data from user
                 </Button>
               </Form>
 

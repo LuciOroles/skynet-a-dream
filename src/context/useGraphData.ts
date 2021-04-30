@@ -2,7 +2,7 @@ import useSkyStatus from './useSkyStatus';
 import { useAppContext } from './index';
 
 
-type UnparsedData = {
+export type UnparsedData = {
     data: string;
 };
 export type Dot = {
@@ -11,7 +11,7 @@ export type Dot = {
     id: string;
 }
 export type Edge = [Dot, Dot];
-type Roles = 'build' | 'connect';
+export type Roles = 'build' | 'connect';
 export type ParsedData = {
     role: Roles,
     userId: string,

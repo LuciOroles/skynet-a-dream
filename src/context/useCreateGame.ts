@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import useSkyStatus from './useSkyStatus';
-import { Roles } from '../components/Main';
+import { Roles } from './useGraphData';
 
 type GameSetup = {
     userId: string,

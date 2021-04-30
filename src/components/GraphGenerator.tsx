@@ -5,9 +5,9 @@ import { Circle } from '@svgdotjs/svg.js';
 import { createCircle } from '../context/useSvgDotsOnClick';
 import useSVGContext from '../context/useSVGContext';
 import useCreateGame from '../context/useCreateGame';
-import { Dot, Edge } from '../context/useGraphData';
+import { Dot, Edge, Roles } from '../context/useGraphData';
 import { Button } from 'semantic-ui-react';
-import { Roles } from './Main';
+
 type Coords = {
   x: number;
   y: number;
