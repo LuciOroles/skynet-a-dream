@@ -17,8 +17,6 @@ interface Props {
   intialDots?: Dot[];
   intialEdges?: Edge[];
   setJson: Function;
-  loadingDots: boolean;
-  error: Error | null;
 }
 
 const drawConfig = {
@@ -31,8 +29,6 @@ export default function GraphGenerator({
   intialDots,
   intialEdges,
   setJson,
-  error,
-  loadingDots,
 }: Props): ReactElement {
   const canvasRef = createRef<HTMLDivElement>();
   const drawCtx = useSVGContext(canvasRef);
@@ -46,8 +42,6 @@ export default function GraphGenerator({
 
   const [svg, setSvg] = useState<SVGElement>();
   const [listener, setListener] = useState<number>(0);
-
-  const dataLoading = loading || loadingDots;
 
   useEffect(() => {
     if (intialDots) {
@@ -177,18 +171,14 @@ export default function GraphGenerator({
     }
   };
 
-  if (error) {
-    return <div>Unable to get data!</div>;
-  }
-
   return (
     <div>
-      {dataLoading && <div>Loading...</div>}
+      {loading && <div>Loading...</div>}
       {
         <div
           id="canvas"
           ref={canvasRef}
-          style={{ display: dataLoading ? 'none' : 'block' }}
+          style={{ display: loading ? 'none' : 'block' }}
         />
       }
       <div className="button-group">

@@ -8,12 +8,12 @@ export default function NavBar(): ReactElement {
       <ul className="listMenu">
         <li>
           <Header as="h3">
-            <Link to="/connect">Create game </Link>
+            <Link to="/">Hello</Link>
           </Header>
         </li>
         <li>
           <Header as="h3">
-            <Link to="/graph">Graph</Link>
+            <Link to="/connect">Create game </Link>
           </Header>
         </li>
       </ul>

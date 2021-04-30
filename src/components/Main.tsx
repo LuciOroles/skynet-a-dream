@@ -16,11 +16,15 @@ export default function Main(): ReactElement {
   const [userId, setUserId] = useState<string>('');
   const [gameId, setGameId] = useState<string>('');
   const [role, setRole] = useState<Roles | string>('');
+  const [userRole, setUserRole] = useState<Roles | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
-  const [dots, setDots] = useState<Dot[] | null>([]);
+  const [dots, setDots] = useState<Dot[]>([]);
+  const [edges, setEdges] = useState<Edge[]>([]);
+  const [authorId, setAuthorId] = useState<string>('');
 
-  const [edges, setEdges] = useState<Edge[] | null>([]);
+  const validInput = userId && gameId && role;
+  const validGraph = Boolean(userRole) && Boolean(authorId);
 
   const createGame = useCreateGame();
   const getGraphData = useGraphData();
@@ -38,11 +42,9 @@ export default function Main(): ReactElement {
 
   const handleUserChange = handleInputChange(setUserId);
   const handleGameIdChange = handleInputChange(setGameId);
-  const validInput = userId && gameId && role;
 
   const handleStartGame = async () => {
     setLoading(true);
-
     try {
       if (userId && gameId && ['build', 'connect'].indexOf(role) > -1) {
         const r = await createGame({
@@ -56,18 +58,21 @@ export default function Main(): ReactElement {
       console.error('Unable to create game!');
       alert('Unable to create game!');
     }
-
     setLoading(false);
   };
 
   const handleGetData = async () => {
     setLoading(true);
-    const result = await getGraphData('game1.json');
-
-    setDots(result.dots);
-    setEdges(result.edges);
-    setError(result.error);
-    debugger;
+    const result = await getGraphData(`${gameId}.json`);
+    if (result.error === null) {
+      setDots(result.dots);
+      setEdges(result.edges);
+      setUserRole(result.role);
+      setAuthorId(result.userId);
+      debugger;
+    } else {
+      setError(result);
+    }
     setLoading(false);
   };
 
@@ -137,13 +142,18 @@ export default function Main(): ReactElement {
               <Dimmer active={loading}>
                 <Loader />
               </Dimmer>
+              <Dimmer active={Boolean(error)}>
+                <h2>Unable to connect!</h2>
+              </Dimmer>
             </Dimmer.Dimmable>
           </Grid.Column>
         </Grid.Row>
+        <Grid.Row>
+          {validGraph && (
+            <GraphContainer edges={edges} dots={dots} role={role} />
+          )}
+        </Grid.Row>
       </Grid>
-      {edges && dots && role && (
-        <GraphContainer edges={edges} dots={dots} role={role} />
-      )}
     </Container>
   );
 }

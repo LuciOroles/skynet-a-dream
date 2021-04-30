@@ -15,8 +15,8 @@ type Roles = 'build' | 'connect';
 export type ParsedData = {
     role: Roles,
     userId: string,
-    dots?: Dot[],
-    edges?: Edge[],
+    dots: Dot[],
+    edges: Edge[],
 }
 
 
@@ -36,7 +36,7 @@ const useGraphData = () => {
 
             return {
                 dots: parsedData.dots as Dot[],
-                edges: parsedData?.edges as Edge[],
+                edges: parsedData.edges as Edge[],
                 role: parsedData.role,
                 userId: parsedData.userId,
                 error: null
@@ -44,13 +44,8 @@ const useGraphData = () => {
 
         } catch (error) {
             console.error(`Unable to get the json data ${error}`);
-            return {
-                dots: null,
-                edges: null,
-                role: null,
-                userId: null,
-                error,
-            }
+            return error;
+
         }
 
     }
