@@ -21,16 +21,16 @@ const useCreateGame = () => {
 
     return async (gs: GameSetup) => {
 
-        let graphPair = {};
-        if (gs.role === 'build') graphPair = { dots: [] };
-        if (gs.role === 'connect') graphPair = { edges: [] }
+
+
         setLoading(true);
         try {
             const { data } = await mySky.setJSON(`${domain}/${gs.gameId}.json`, {
                 data: JSON.stringify({
                     userId: gs.userId,
                     role: gs.role,
-                    ...graphPair,
+                    dots: [],
+                    edges: []
 
                 }),
             });
