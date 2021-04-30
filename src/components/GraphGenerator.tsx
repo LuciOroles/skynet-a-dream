@@ -4,19 +4,21 @@ import { Circle } from '@svgdotjs/svg.js';
 
 import { createCircle } from '../context/useSvgDotsOnClick';
 import useSVGContext from '../context/useSVGContext';
+import useCreateGame from '../context/useCreateGame';
 import { Dot, Edge } from '../context/useGraphData';
 import { Button } from 'semantic-ui-react';
-
+import { Roles } from './Main';
 type Coords = {
   x: number;
   y: number;
 };
 
 interface Props {
-  connect: boolean;
+  role: Roles;
   intialDots?: Dot[];
   intialEdges?: Edge[];
-  setJson: Function;
+  userId: string;
+  gameId: string;
 }
 
 const drawConfig = {
@@ -25,13 +27,15 @@ const drawConfig = {
 };
 
 export default function GraphGenerator({
-  connect,
+  role,
   intialDots,
   intialEdges,
-  setJson,
+  userId,
+  gameId,
 }: Props): ReactElement {
   const canvasRef = createRef<HTMLDivElement>();
   const drawCtx = useSVGContext(canvasRef);
+  const updateGame = useCreateGame();
 
   const [dotCollection, setDotCollection] = useState<Dot[]>(intialDots || []);
   const [activeDots, setActiveDots] = useState<Dot[]>([]);
@@ -42,6 +46,7 @@ export default function GraphGenerator({
 
   const [svg, setSvg] = useState<SVGElement>();
   const [listener, setListener] = useState<number>(0);
+  const connect = role === 'connect';
 
   useEffect(() => {
     if (intialDots) {
@@ -159,11 +164,14 @@ export default function GraphGenerator({
   const handleSendGraphData = async () => {
     setLoading(true);
     try {
-      const coords = {
+      const newData = {
+        userId,
+        role: (connect ? 'connect' : 'build') as Roles,
         dots: dotCollection,
         edges: activeEdges,
+        gameId,
       };
-      await setJson(coords);
+      await updateGame(newData);
       setLoading(false);
     } catch (error) {
       console.error(`unable to set the graph dots coors  ${error}`);

@@ -13,16 +13,10 @@ type GameSetup = {
 const useCreateGame = () => {
     const domain = window.location.hostname === 'localhost' ? 'localhost' : 'gdleibaoji.hns';
     const { mySky } = useSkyStatus();
-
     const [loading, setLoading] = useState<boolean>(false);
     const [response, setResponse] = useState<any>(null);
 
-
-
     return async (gs: GameSetup) => {
-
-
-
         setLoading(true);
         try {
             const { data } = await mySky.setJSON(`${domain}/${gs.gameId}.json`, {
@@ -31,7 +25,6 @@ const useCreateGame = () => {
                     role: gs.role,
                     dots: [],
                     edges: []
-
                 }),
             });
 

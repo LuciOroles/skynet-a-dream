@@ -8,7 +8,7 @@ import { Container, Form, Grid, Button } from 'semantic-ui-react';
 import { Dimmer, Loader, Segment } from 'semantic-ui-react';
 import useCreateGame from '../context/useCreateGame';
 import useGraphData, { Dot, Edge } from '../context/useGraphData';
-import GraphContainer from './GraphContainer';
+import GraphGenerator from './GraphGenerator';
 
 export type Roles = 'build' | 'connect';
 
@@ -16,15 +16,20 @@ export default function Main(): ReactElement {
   const [userId, setUserId] = useState<string>('');
   const [gameId, setGameId] = useState<string>('');
   const [role, setRole] = useState<Roles | string>('');
-  const [userRole, setUserRole] = useState<Roles | null>(null);
+
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [dots, setDots] = useState<Dot[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [authorId, setAuthorId] = useState<string>('');
 
+  const [userRole, setUserRole] = useState<Roles | ''>('');
+
   const validInput = userId && gameId && role;
-  const validGraph = Boolean(userRole) && Boolean(authorId);
+  const validGraph =
+    Boolean(userRole) &&
+    Boolean(authorId) &&
+    ['build', 'connect'].indexOf(userRole) > -1;
 
   const createGame = useCreateGame();
   const getGraphData = useGraphData();
@@ -69,6 +74,7 @@ export default function Main(): ReactElement {
       setEdges(result.edges);
       setUserRole(result.role);
       setAuthorId(result.userId);
+
       debugger;
     } else {
       setError(result);
@@ -150,7 +156,13 @@ export default function Main(): ReactElement {
         </Grid.Row>
         <Grid.Row>
           {validGraph && (
-            <GraphContainer edges={edges} dots={dots} role={role} />
+            <GraphGenerator
+              intialDots={dots}
+              intialEdges={edges}
+              role={userRole as Roles}
+              userId={authorId}
+              gameId={gameId}
+            />
           )}
         </Grid.Row>
       </Grid>
