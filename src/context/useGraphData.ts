@@ -38,6 +38,7 @@ const useGraphData = () => {
                 dots: parsedData.dots as Dot[],
                 edges: parsedData?.edges as Edge[],
                 role: parsedData.role,
+                userId: parsedData.userId,
                 error: null
             };
 
@@ -47,6 +48,7 @@ const useGraphData = () => {
                 dots: null,
                 edges: null,
                 role: null,
+                userId: null,
                 error,
             }
         }
