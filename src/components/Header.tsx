@@ -7,7 +7,7 @@ const AppHeader = () => {
     <header className="header">
       <div className="header-left">
         <Header as="h1" id="title">
-          Skynet map builder
+          Skynet Graph builder!
         </Header>
       </div>
 

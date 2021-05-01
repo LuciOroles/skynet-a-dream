@@ -1,6 +1,7 @@
 import React, { ReactElement, createRef, useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import { Circle } from '@svgdotjs/svg.js';
+import { Dimmer, Loader, Segment } from 'semantic-ui-react';
 
 import { createCircle } from '../context/useSvgDotsOnClick';
 import useSVGContext from '../context/useSVGContext';
@@ -180,34 +181,38 @@ export default function GraphGenerator({
   };
 
   return (
-    <div>
-      {loading && <div>Loading...</div>}
-      {
-        <div
-          id="canvas"
-          ref={canvasRef}
-          style={{ display: loading ? 'none' : 'block' }}
-        />
-      }
-      <div className="button-group">
-        <Button
-          type="button"
-          onClick={handleSendGraphData}
-          primary
-          disabled={loading}
-        >
-          Update Graph
-        </Button>
-
-        <label>
-          Eraser
-          <input
-            type="checkbox"
-            defaultChecked={eraser}
-            onChange={() => setEraser(!eraser)}
+    <Dimmer.Dimmable as={Segment} dimmed={loading}>
+      <React.Fragment>
+        {
+          <div
+            id="canvas"
+            ref={canvasRef}
+            style={{ display: loading ? 'none' : 'block' }}
           />
-        </label>
-      </div>
-    </div>
+        }
+        <div className="button-group">
+          <Button
+            type="button"
+            onClick={handleSendGraphData}
+            primary
+            disabled={loading}
+          >
+            Update Graph
+          </Button>
+
+          <label>
+            Eraser
+            <input
+              type="checkbox"
+              defaultChecked={eraser}
+              onChange={() => setEraser(!eraser)}
+            />
+          </label>
+        </div>
+      </React.Fragment>
+      <Dimmer active={loading}>
+        <Loader />
+      </Dimmer>
+    </Dimmer.Dimmable>
   );
 }
