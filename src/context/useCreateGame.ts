@@ -20,19 +20,15 @@ const useCreateGame = () => {
 
     return async (gs: GameSetup) => {
         setLoading(true);
-        debugger;
         try {
             const { data } = await mySky.setJSON(`${domain}/${gs.gameId}.json`, {
                 data: JSON.stringify(gs),
             });
-
             setResponse(data);
-
         } catch (error) {
             console.error(error.message);
         }
         setLoading(false);
-
         return {
             response,
             loading

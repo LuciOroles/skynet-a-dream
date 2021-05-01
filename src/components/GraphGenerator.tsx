@@ -196,7 +196,7 @@ export default function GraphGenerator({
           primary
           disabled={loading}
         >
-          Send Data
+          Update Graph
         </Button>
 
         <label>

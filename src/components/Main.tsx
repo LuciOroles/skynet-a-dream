@@ -15,6 +15,7 @@ import useGraphData, {
   ParsedData,
 } from '../context/useGraphData';
 import GraphGenerator from './GraphGenerator';
+import Intro from './Intro';
 import useSkyStatus from '../context/useSkyStatus';
 import { useAppContext } from '../context/index';
 
@@ -32,6 +33,7 @@ export default function Main(): ReactElement {
   const [userRole, setUserRole] = useState<Roles | ''>('');
   const { client } = useSkyStatus();
   const { state } = useAppContext();
+  const { logged } = state;
 
   const validInput = userId && gameId && role;
   const validGraph =
@@ -86,7 +88,6 @@ export default function Main(): ReactElement {
         `${state.domain}/${gameId}.json`
       );
       const parsedData: ParsedData = JSON.parse((data as UnparsedData).data);
-      debugger;
       if (role === 'connect') {
         setDots(parsedData.dots);
       } else {
@@ -104,13 +105,24 @@ export default function Main(): ReactElement {
       setEdges(result.edges);
       setUserRole(result.role);
       setAuthorId(result.userId);
-
       getForSecondUser(result.userId, gameId, result.role);
     } else {
       setError(result);
     }
     setLoading(false);
   };
+
+  if (!state) {
+    return <div>Unable to init the app!</div>;
+  }
+
+  if (!logged) {
+    return (
+      <Container>
+        <Intro />
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -162,7 +174,7 @@ export default function Main(): ReactElement {
                   primary
                   onClick={handleStartGame}
                 >
-                  Start game
+                  Init new graph
                 </Button>
 
                 <Button
@@ -183,17 +195,17 @@ export default function Main(): ReactElement {
               </Dimmer>
             </Dimmer.Dimmable>
           </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          {validGraph && (
-            <GraphGenerator
-              intialDots={dots}
-              intialEdges={edges}
-              role={userRole as Roles}
-              userId={authorId}
-              gameId={gameId}
-            />
-          )}
+          <Grid.Column>
+            {validGraph && (
+              <GraphGenerator
+                intialDots={dots}
+                intialEdges={edges}
+                role={userRole as Roles}
+                userId={authorId}
+                gameId={gameId}
+              />
+            )}
+          </Grid.Column>
         </Grid.Row>
       </Grid>
     </Container>
