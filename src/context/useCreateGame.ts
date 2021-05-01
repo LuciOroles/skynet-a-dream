@@ -1,12 +1,14 @@
 
 import { useState } from 'react';
 import useSkyStatus from './useSkyStatus';
-import { Roles } from './useGraphData';
+import { Roles, Dot, Edge } from './useGraphData';
 
 type GameSetup = {
     userId: string,
     gameId: string,
     role: Roles,
+    dots: Dot[],
+    edges: Edge[],
 }
 
 
@@ -18,14 +20,10 @@ const useCreateGame = () => {
 
     return async (gs: GameSetup) => {
         setLoading(true);
+        debugger;
         try {
             const { data } = await mySky.setJSON(`${domain}/${gs.gameId}.json`, {
-                data: JSON.stringify({
-                    userId: gs.userId,
-                    role: gs.role,
-                    dots: [],
-                    edges: []
-                }),
+                data: JSON.stringify(gs),
             });
 
             setResponse(data);

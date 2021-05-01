@@ -103,7 +103,7 @@ export default function GraphGenerator({
       });
     };
 
-    if (dotCollection.length || activeEdges.length) {
+    if ((dotCollection.length || activeEdges.length) && drawCtx) {
       drawCtx.clear();
       activeEdges.forEach((eTuple) => {
         drawEdgeTuple(drawCtx, eTuple);

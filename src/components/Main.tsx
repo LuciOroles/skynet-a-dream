@@ -64,6 +64,8 @@ export default function Main(): ReactElement {
           userId,
           gameId,
           role: role as Roles,
+          dots,
+          edges,
         });
         console.log(r);
       }
@@ -73,7 +75,27 @@ export default function Main(): ReactElement {
     }
     setLoading(false);
   };
-
+  const getForSecondUser = async (
+    authorId: string,
+    gameId: string,
+    role: string
+  ) => {
+    try {
+      const { data } = await client.file.getJSON(
+        authorId,
+        `${state.domain}/${gameId}.json`
+      );
+      const parsedData: ParsedData = JSON.parse((data as UnparsedData).data);
+      debugger;
+      if (role === 'connect') {
+        setDots(parsedData.dots);
+      } else {
+        setEdges(parsedData.edges);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const handleGetData = async () => {
     setLoading(true);
     const result = await getGraphData(`${gameId}.json`);
@@ -83,29 +105,11 @@ export default function Main(): ReactElement {
       setUserRole(result.role);
       setAuthorId(result.userId);
 
-      debugger;
+      getForSecondUser(result.userId, gameId, result.role);
     } else {
       setError(result);
     }
     setLoading(false);
-  };
-
-  const getForSecondUser = async () => {
-    try {
-      const { data } = await client.file.getJSON(
-        authorId,
-        `${state.domain}/${gameId}.json`
-      );
-      const parsedData: ParsedData = JSON.parse((data as UnparsedData).data);
-      debugger;
-      if (parsedData.role === 'connect') {
-        setDots(parsedData.dots);
-      } else {
-        setEdges(parsedData.edges);
-      }
-    } catch (err) {
-      console.error(err);
-    }
   };
 
   return (
@@ -167,16 +171,7 @@ export default function Main(): ReactElement {
                   primary
                   onClick={handleGetData}
                 >
-                  Connect to game
-                </Button>
-
-                <Button
-                  type="button"
-                  disabled={!authorId}
-                  primary
-                  onClick={getForSecondUser}
-                >
-                  Get data from user
+                  Connect to Graph
                 </Button>
               </Form>
 
