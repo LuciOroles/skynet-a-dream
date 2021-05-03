@@ -9,26 +9,21 @@ import {
 } from 'semantic-ui-react';
 import useSkyStatus from '../context/useSkyStatus';
 import useGraphData, {
-  Dot,
-  Edge,
   UnparsedData,
-  Roles,
   ParsedData,
 } from '../context/useGraphData';
 import { useAppContext } from '../context/index';
+import { useGraphContext } from '../context/GraphContext';
 
 export default function Connect(): ReactElement {
   const { client } = useSkyStatus();
   const getGraphData = useGraphData();
   const { state } = useAppContext();
+  const { dispatch } = useGraphContext();
 
   const [loading, setLoading] = useState<boolean>(false);
   const [gameId, setGameId] = useState<string>('');
   const [error, setError] = useState<Error | null>(null);
-  const [dots, setDots] = useState<Dot[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
-  const [authorId, setAuthorId] = useState<string>('');
-  const [userRole, setUserRole] = useState<Roles | ''>('');
 
   const handleInputChange = (fn: Function) => {
     return (e: ChangeEvent) => {
@@ -42,10 +37,11 @@ export default function Connect(): ReactElement {
     setLoading(true);
     const result = await getGraphData(`${gameId}.json`);
     if (result.error === null) {
-      setDots(result.dots);
-      setEdges(result.edges);
-      setUserRole(result.role);
-      setAuthorId(result.userId);
+      dispatch({ type: 'set-dots', payload: { dots: result.dots } });
+      dispatch({ type: 'set-edges', payload: { edges: result.edges } });
+      dispatch({ type: 'set-role', payload: result.role });
+      dispatch({ type: 'set-author-id', payload: result.userId });
+
       getForSecondUser(result.userId, gameId, result.role);
     } else {
       setError(result);
@@ -65,9 +61,9 @@ export default function Connect(): ReactElement {
       );
       const parsedData: ParsedData = JSON.parse((data as UnparsedData).data);
       if (role === 'connect') {
-        setDots(parsedData.dots);
+        dispatch({ type: 'set-dots', payload: { dots: parsedData.dots } });
       } else {
-        setEdges(parsedData.edges);
+        dispatch({ type: 'set-edges', payload: { edges: parsedData.edges } });
       }
     } catch (err) {
       console.error(err);

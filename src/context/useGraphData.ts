@@ -21,11 +21,8 @@ export type ParsedData = {
 
 
 const useGraphData = () => {
-
-
     const { state } = useAppContext();
     const { domain } = state;
-
     const { mySky } = useSkyStatus();
 
     return async (path: string) => {
