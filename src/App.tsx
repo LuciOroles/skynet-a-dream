@@ -4,9 +4,8 @@ import './App.css';
 
 import { LoginProvider } from './context';
 import Header from './components/Header';
-
-import InitGraph from './components/InitGraph';
 import Wrapper from './components/Wrapper';
+import InitBord from './components/InitBord';
 
 function App() {
   return (
@@ -14,7 +13,7 @@ function App() {
       <LoginProvider>
         <Header />
 
-        <Wrapper col1={<InitGraph />} />
+        <Wrapper col1={<InitBord />} />
       </LoginProvider>
     </div>
   );

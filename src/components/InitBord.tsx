@@ -1,30 +1,17 @@
 import React, { ReactElement } from 'react';
-import {
-  Container,
-  Form,
-  Grid,
-  Button,
-  Tab,
-  Dimmer,
-  Loader,
-  Segment,
-} from 'semantic-ui-react';
+import { Container, Tab } from 'semantic-ui-react';
+import InitGraph from './InitGraph';
+import Connect from './Connect';
 
-interface Props {}
-const MyTab2 = () => <div>Test X</div>;
 const panes = [
-  { menuItem: 'Init Graph', render: () => <Tab.Pane>Tab 1 Content</Tab.Pane> },
+  { menuItem: 'Init Graph', render: () => <InitGraph /> },
   {
     menuItem: 'Connect to Graph',
-    render: () => (
-      <Tab.Pane>
-        <MyTab2 />
-      </Tab.Pane>
-    ),
+    render: () => <Connect />,
   },
 ];
 
-export default function InitBord({}: Props): ReactElement {
+export default function InitBord(): ReactElement {
   return (
     <Container>
       <Tab panes={panes} />

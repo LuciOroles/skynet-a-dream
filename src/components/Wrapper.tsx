@@ -1,6 +1,8 @@
-import React, { ReactComponentElement, ReactElement } from 'react';
+import React, { ReactElement } from 'react';
+import Intro from './Intro';
 
 import { Container, Grid } from 'semantic-ui-react';
+import { useAppContext } from '../context/index';
 
 interface Props {
   col1: ReactElement;
@@ -8,6 +10,20 @@ interface Props {
 }
 
 export default function Wrapper({ col1, col2 }: Props): ReactElement {
+  const { state } = useAppContext();
+  const { logged } = state;
+  if (!state) {
+    return <div>Unable to init the app!</div>;
+  }
+
+  if (!logged) {
+    return (
+      <Container>
+        <Intro />
+      </Container>
+    );
+  }
+
   return (
     <Container>
       <Grid columns={2} divided>

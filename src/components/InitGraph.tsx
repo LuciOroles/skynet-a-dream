@@ -13,42 +13,18 @@ import {
   Segment,
 } from 'semantic-ui-react';
 import useCreateGame from '../context/useCreateGame';
-import useGraphData, {
-  Dot,
-  Edge,
-  UnparsedData,
-  Roles,
-  ParsedData,
-} from '../context/useGraphData';
-
-import Intro from './Intro';
-import useSkyStatus from '../context/useSkyStatus';
-import { useAppContext } from '../context/index';
+import { Roles } from '../context/useGraphData';
 
 export default function InitGraph(): ReactElement {
   const [userId, setUserId] = useState<string>('');
   const [gameId, setGameId] = useState<string>('');
   const [role, setRole] = useState<Roles | string>('');
-
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
-  const [dots, setDots] = useState<Dot[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
-  const [authorId, setAuthorId] = useState<string>('');
-
-  const [userRole, setUserRole] = useState<Roles | ''>('');
-  const { client } = useSkyStatus();
-  const { state } = useAppContext();
-  const { logged } = state;
 
   const validInput = userId && gameId && role;
-  const validGraph =
-    Boolean(userRole) &&
-    Boolean(authorId) &&
-    ['build', 'connect'].indexOf(userRole) > -1;
 
   const createGame = useCreateGame();
-  const getGraphData = useGraphData();
 
   const handleInputChange = (fn: Function) => {
     return (e: ChangeEvent) => {
@@ -64,7 +40,7 @@ export default function InitGraph(): ReactElement {
   const handleUserChange = handleInputChange(setUserId);
   const handleGameIdChange = handleInputChange(setGameId);
 
-  const handleStartGame = async () => {
+  const handleGraphInit = async () => {
     setLoading(true);
     try {
       if (userId && gameId && ['build', 'connect'].indexOf(role) > -1) {
@@ -72,63 +48,18 @@ export default function InitGraph(): ReactElement {
           userId,
           gameId,
           role: role as Roles,
-          dots,
-          edges,
+          dots: [],
+          edges: [],
         });
         console.log(r);
+        debugger;
       }
     } catch (error) {
       console.error('Unable to create game!');
-      alert('Unable to create game!');
+      setError(error);
     }
     setLoading(false);
   };
-  const getForSecondUser = async (
-    authorId: string,
-    gameId: string,
-    role: string
-  ) => {
-    try {
-      const { data } = await client.file.getJSON(
-        authorId,
-        `${state.domain}/${gameId}.json`
-      );
-      const parsedData: ParsedData = JSON.parse((data as UnparsedData).data);
-      if (role === 'connect') {
-        setDots(parsedData.dots);
-      } else {
-        setEdges(parsedData.edges);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  const handleGetData = async () => {
-    setLoading(true);
-    const result = await getGraphData(`${gameId}.json`);
-    if (result.error === null) {
-      setDots(result.dots);
-      setEdges(result.edges);
-      setUserRole(result.role);
-      setAuthorId(result.userId);
-      getForSecondUser(result.userId, gameId, result.role);
-    } else {
-      setError(result);
-    }
-    setLoading(false);
-  };
-
-  if (!state) {
-    return <div>Unable to init the app!</div>;
-  }
-
-  if (!logged) {
-    return (
-      <Container>
-        <Intro />
-      </Container>
-    );
-  }
 
   return (
     <Container>
@@ -156,7 +87,6 @@ export default function InitGraph(): ReactElement {
               value={role}
               onChange={(e: SyntheticEvent) => {
                 const t = e.target as HTMLSelectElement;
-
                 setRole(t.value);
               }}
             >
@@ -175,18 +105,9 @@ export default function InitGraph(): ReactElement {
             type="button"
             disabled={!validInput}
             primary
-            onClick={handleStartGame}
+            onClick={handleGraphInit}
           >
             Init new graph
-          </Button>
-
-          <Button
-            type="button"
-            disabled={!gameId}
-            primary
-            onClick={handleGetData}
-          >
-            Connect to Graph
           </Button>
         </Form>
 
