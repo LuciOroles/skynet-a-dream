@@ -41,6 +41,7 @@ export default function Connect(): ReactElement {
       dispatch({ type: 'set-edges', payload: { edges: result.edges } });
       dispatch({ type: 'set-role', payload: result.role });
       dispatch({ type: 'set-author-id', payload: result.userId });
+      dispatch({ type: 'set-game-id', payload: gameId });
 
       getForSecondUser(result.userId, gameId, result.role);
     } else {

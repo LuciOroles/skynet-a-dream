@@ -7,12 +7,16 @@ type DotsPayload = {
 type EdgesPayload = {
   edges: Edge[];
 };
-type State = ParsedData;
+type State = ParsedData & {
+  gameId: string;
+};
 type Action =
   | { type: 'set-dots'; payload: DotsPayload }
   | { type: 'set-edges'; payload: EdgesPayload }
   | { type: 'set-author-id'; payload: string }
-  | { type: 'set-role'; payload: string };
+  | { type: 'set-role'; payload: string }
+  | { type: 'set-game-id'; payload: string };
+
 type Dispatch = (action: Action) => void;
 
 const GraphContext = React.createContext<
@@ -29,6 +33,8 @@ function graphContextReducer(state: State, action: Action) {
       return { ...state, userId: action.payload as string };
     case 'set-role':
       return { ...state, role: action.payload as Roles };
+    case 'set-game-id':
+      return { ...state, gameId: action.payload as string };
     default:
       throw new Error('use proper action type');
   }
@@ -42,6 +48,7 @@ export const GraphProvider = ({ children }: GraphProviderProps) => {
     edges: [],
     role: 'connect',
     userId: '',
+    gameId: '',
   });
   const value = {
     state,

@@ -7,6 +7,7 @@ import { createCircle } from '../context/useSvgDotsOnClick';
 import useSVGContext from '../context/useSVGContext';
 import useCreateGame from '../context/useCreateGame';
 import { Dot, Edge, Roles } from '../context/useGraphData';
+import { useGraphContext } from '../context/GraphContext';
 import { Button } from 'semantic-ui-react';
 
 type Coords = {
@@ -14,53 +15,27 @@ type Coords = {
   y: number;
 };
 
-interface Props {
-  role: Roles;
-  intialDots?: Dot[];
-  intialEdges?: Edge[];
-  userId: string;
-  gameId: string;
-}
-
 const drawConfig = {
   color: '#542aea',
   radius: 7,
 };
 
-export default function GraphGenerator({
-  role,
-  intialDots,
-  intialEdges,
-  userId,
-  gameId,
-}: Props): ReactElement {
+export default function GraphGenerator(): ReactElement {
   const canvasRef = createRef<HTMLDivElement>();
   const drawCtx = useSVGContext(canvasRef);
   const updateGame = useCreateGame();
+  const { state } = useGraphContext();
 
-  const [dotCollection, setDotCollection] = useState<Dot[]>(intialDots || []);
+  const [dotCollection, setDotCollection] = useState<Dot[]>(state.dots || []);
+  const [activeEdges, setActiveEdges] = useState<Edge[]>(state.edges || []);
   const [activeDots, setActiveDots] = useState<Dot[]>([]);
-  const [activeEdges, setActiveEdges] = useState<Edge[]>(intialEdges || []);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [eraser, setEraser] = useState<boolean>(false);
 
   const [svg, setSvg] = useState<SVGElement>();
   const [listener, setListener] = useState<number>(0);
-  const connect = role === 'connect';
-
-  useEffect(() => {
-    if (intialDots) {
-      setDotCollection(intialDots);
-    }
-    if (intialEdges) {
-      setActiveEdges(intialEdges);
-    }
-    return () => {
-      setDotCollection([]);
-      setActiveEdges([]);
-    };
-  }, [intialDots, intialEdges]);
+  const connect = state.role === 'connect';
 
   const removeDotById = (dotId: string) => {
     setDotCollection((d) => d.filter((dot) => dot.id !== dotId));
@@ -166,11 +141,11 @@ export default function GraphGenerator({
     setLoading(true);
     try {
       const newData = {
-        userId,
+        userId: state.userId,
         role: (connect ? 'connect' : 'build') as Roles,
         dots: dotCollection,
         edges: activeEdges,
-        gameId,
+        gameId: state.gameId,
       };
       await updateGame(newData);
       setLoading(false);
@@ -179,6 +154,10 @@ export default function GraphGenerator({
       setLoading(false);
     }
   };
+
+  if (dotCollection.length === 0 && activeEdges.length === 0) {
+    return <h3>No data yet!</h3>;
+  }
 
   return (
     <Dimmer.Dimmable as={Segment} dimmed={loading}>

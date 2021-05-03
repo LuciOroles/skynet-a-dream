@@ -6,6 +6,7 @@ import { LoginProvider } from './context';
 import Header from './components/Header';
 import Wrapper from './components/Wrapper';
 import InitBord from './components/InitBord';
+import GraphGenerator from './components/GraphGenerator';
 
 function App() {
   return (
@@ -13,7 +14,7 @@ function App() {
       <LoginProvider>
         <Header />
 
-        <Wrapper col1={<InitBord />} />
+        <Wrapper col1={<InitBord />} col2={<GraphGenerator />} />
       </LoginProvider>
     </div>
   );
