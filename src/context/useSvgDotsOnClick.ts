@@ -1,10 +1,7 @@
-
-
 type Coords = {
     x: number;
     y: number;
 };
-
 
 type CircleConfig = {
     radius: number;
