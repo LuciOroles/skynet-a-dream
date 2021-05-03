@@ -1,18 +1,10 @@
-import { useEffect, useState } from 'react';
+
 
 type Coords = {
     x: number;
     y: number;
 };
 
-type DotConfig = {
-    radius: number;
-    color: string;
-};
-
-interface AddDot {
-    (d: Coords): void;
-};
 
 type CircleConfig = {
     radius: number;
@@ -37,34 +29,3 @@ export function createCircle(drawCtx: any, circleConfig: CircleConfig, clickHand
 
     return circle;
 }
-
-const useSvgDotsOnClick = (
-    drawCtx: CanvasRenderingContext2D,
-    dot: DotConfig,
-    onAddDot: AddDot
-) => {
-    const [svg, setSvg] = useState<SVGElement>();
-    const [listener, setListener] = useState<number>(0);
-
-    useEffect(() => {
-        const svgS = document.querySelector('#canvas>svg') as SVGElement;
-        if (svgS && !svg) setSvg(svgS);
-        if (svg && listener === 0) {
-            setListener(listener + 1);
-            svg.addEventListener('click', (e: MouseEvent) => {
-                const target = e.target as SVGElement;
-                var rect = target.getBoundingClientRect();
-                var x = e.clientX - rect.left;
-                var y = e.clientY - rect.top;
-                const coords: Coords = {
-                    x,
-                    y,
-                };
-
-                onAddDot(coords);
-            });
-        }
-    }, [drawCtx, svg, dot, onAddDot, listener]);
-};
-
-export default useSvgDotsOnClick;

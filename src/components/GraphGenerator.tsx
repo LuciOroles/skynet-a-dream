@@ -1,11 +1,13 @@
 import React, { ReactElement, createRef, useState, useEffect } from 'react';
-
-import useDataServices from '../context/useDataServices';
-import useSvgDotsOnClick, { createCircle } from '../context/useSvgDotsOnClick';
-import useSVGContext from '../context/useSVGContext';
-import useGetDots, { Dot } from '../context/useGetDots';
 import { nanoid } from 'nanoid';
 import { Circle } from '@svgdotjs/svg.js';
+import { Dimmer, Loader, Segment } from 'semantic-ui-react';
+
+import { createCircle } from '../context/useSvgDotsOnClick';
+import useSVGContext from '../context/useSVGContext';
+import useCreateGame from '../context/useCreateGame';
+import { Dot, Edge, Roles } from '../context/useGraphData';
+import { Button } from 'semantic-ui-react';
 
 type Coords = {
   x: number;
@@ -13,8 +15,11 @@ type Coords = {
 };
 
 interface Props {
-  path: string;
-  dots?: Dot[];
+  role: Roles;
+  intialDots?: Dot[];
+  intialEdges?: Edge[];
+  userId: string;
+  gameId: string;
 }
 
 const drawConfig = {
@@ -22,42 +27,44 @@ const drawConfig = {
   radius: 7,
 };
 
-type Edge = [Dot, Dot];
-
-const drawEdgeTuple = (drawCtx: any, segement: Dot[]) => {
-  const [d1, d2] = segement;
-  const r = drawConfig.radius;
-  const line = drawCtx.line(d1.x + r, d1.y + r, d2.x + r, d2.y + r);
-  line.stroke({ color: drawConfig.color, width: 3, linecap: 'round' });
-  line.click((event: MouseEvent) => {
-    event.stopImmediatePropagation();
-  });
-};
-
-export default function GraphGenerator({ path }: Props): ReactElement {
+export default function GraphGenerator({
+  role,
+  intialDots,
+  intialEdges,
+  userId,
+  gameId,
+}: Props): ReactElement {
   const canvasRef = createRef<HTMLDivElement>();
   const drawCtx = useSVGContext(canvasRef);
-  const { dots, loading: loadingDots } = useGetDots(path);
-  const [dotCollection, setDotCollection] = useState<Dot[]>(dots);
+  const updateGame = useCreateGame();
+
+  const [dotCollection, setDotCollection] = useState<Dot[]>(intialDots || []);
   const [activeDots, setActiveDots] = useState<Dot[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
+  const [activeEdges, setActiveEdges] = useState<Edge[]>(intialEdges || []);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [eraser, setEraser] = useState<boolean>(false);
-  const [connect, setConnect] = useState<boolean>(false);
 
-  const { setJson } = useDataServices(path);
-  const dataLoading = loading || loadingDots;
+  const [svg, setSvg] = useState<SVGElement>();
+  const [listener, setListener] = useState<number>(0);
+  const connect = role === 'connect';
+
+  useEffect(() => {
+    if (intialDots) {
+      setDotCollection(intialDots);
+    }
+    if (intialEdges) {
+      setActiveEdges(intialEdges);
+    }
+    return () => {
+      setDotCollection([]);
+      setActiveEdges([]);
+    };
+  }, [intialDots, intialEdges]);
 
   const removeDotById = (dotId: string) => {
     setDotCollection((d) => d.filter((dot) => dot.id !== dotId));
   };
-
-  useEffect(() => {
-    if (dots.length) {
-      setDotCollection(dots);
-    }
-  }, [dots]);
 
   useEffect(() => {
     const handleDotClick = (e: MouseEvent) => {
@@ -77,9 +84,29 @@ export default function GraphGenerator({ path }: Props): ReactElement {
       }
     };
 
-    if (dotCollection.length || edges.length) {
+    const drawEdgeTuple = (drawCtx: any, segement: Dot[]) => {
+      const [d1, d2] = segement;
+      const r = drawConfig.radius;
+      const line = drawCtx.line(d1.x + r, d1.y + r, d2.x + r, d2.y + r);
+      line.stroke({ color: drawConfig.color, width: 3, linecap: 'round' });
+      line.click((event: MouseEvent) => {
+        event.stopImmediatePropagation();
+        if (eraser) {
+          setActiveEdges((edges) => {
+            return edges.filter((edge) => {
+              const [de1, de2] = edge;
+              const found =
+                (de1 === d1 || de2 === d1) && (de1 === d2 || de2 === d2);
+              return !found;
+            });
+          });
+        }
+      });
+    };
+
+    if ((dotCollection.length || activeEdges.length) && drawCtx) {
       drawCtx.clear();
-      edges.forEach((eTuple) => {
+      activeEdges.forEach((eTuple) => {
         drawEdgeTuple(drawCtx, eTuple);
       });
       dotCollection.forEach((dot) => {
@@ -94,35 +121,58 @@ export default function GraphGenerator({ path }: Props): ReactElement {
         );
       });
     }
-  }, [activeDots, connect, dotCollection, drawCtx, edges, eraser]);
+  }, [activeDots, connect, dotCollection, drawCtx, activeEdges, eraser]);
 
   useEffect(() => {
     if (activeDots.length === 2) {
       const [d1, d2] = activeDots;
-      setEdges((e) => [...e, [d1, d2]]);
+      setActiveEdges((e) => [...e, [d1, d2]]);
       setActiveDots([]);
     }
   }, [drawCtx, activeDots]);
 
-  const handleAddCoords = (c: Coords) => {
-    const newDot = {
-      ...c,
-      id: nanoid(),
+  useEffect(() => {
+    const handleAddingDots = (c: Coords) => {
+      const newDot = {
+        ...c,
+        id: nanoid(),
+      };
+      setDotCollection((d) => {
+        return [...d, newDot];
+      });
     };
-    setDotCollection((d) => {
-      return [...d, newDot];
-    });
-  };
 
-  useSvgDotsOnClick(drawCtx, drawConfig, handleAddCoords);
+    const svgS = document.querySelector('#canvas>svg') as SVGElement;
+    if (svgS && !svg) setSvg(svgS);
+    if (svg && listener === 0) {
+      setListener(listener + 1);
+      svg.addEventListener('click', (e: MouseEvent) => {
+        if (connect) return;
+        const target = e.target as SVGElement;
+        var rect = target.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        const coords: Coords = {
+          x,
+          y,
+        };
 
-  const handleSendData = async () => {
+        handleAddingDots(coords);
+      });
+    }
+  }, [connect, listener, setDotCollection, svg]);
+
+  const handleSendGraphData = async () => {
     setLoading(true);
     try {
-      const coords = {
+      const newData = {
+        userId,
+        role: (connect ? 'connect' : 'build') as Roles,
         dots: dotCollection,
+        edges: activeEdges,
+        gameId,
       };
-      await setJson(JSON.stringify(coords));
+      await updateGame(newData);
       setLoading(false);
     } catch (error) {
       console.error(`unable to set the graph dots coors  ${error}`);
@@ -130,53 +180,39 @@ export default function GraphGenerator({ path }: Props): ReactElement {
     }
   };
 
-  const tempRender = (dot: Dot, i: number) => {
-    return <span key={i}>{JSON.stringify(dot)}</span>;
-  };
-
   return (
-    <div>
-      {dataLoading && <div>Loading...</div>}
-      {
-        <div
-          id="canvas"
-          ref={canvasRef}
-          style={{ display: dataLoading ? 'none' : 'block' }}
-        />
-      }
-      <div className="button-group">
-        <button
-          type="button"
-          onClick={handleSendData}
-          className="spaced-button"
-          disabled={loading}
-        >
-          Send data
-        </button>
-        <label>
-          Eraser
-          <input
-            type="checkbox"
-            defaultChecked={eraser}
-            onChange={() => setEraser(!eraser)}
+    <Dimmer.Dimmable as={Segment} dimmed={loading}>
+      <React.Fragment>
+        {
+          <div
+            id="canvas"
+            ref={canvasRef}
+            style={{ display: loading ? 'none' : 'block' }}
           />
-        </label>
-        <label>
-          Connect
-          <input
-            type="checkbox"
-            defaultChecked={connect}
-            onChange={() => setConnect(!connect)}
-          />
-        </label>
-      </div>
-      <code>
-        <h4>Dot collection:</h4>
-        {dotCollection.map(tempRender)}
+        }
+        <div className="button-group">
+          <Button
+            type="button"
+            onClick={handleSendGraphData}
+            primary
+            disabled={loading}
+          >
+            Update Graph
+          </Button>
 
-        <h4>Active dots</h4>
-        {activeDots.map(tempRender)}
-      </code>
-    </div>
+          <label>
+            Eraser
+            <input
+              type="checkbox"
+              defaultChecked={eraser}
+              onChange={() => setEraser(!eraser)}
+            />
+          </label>
+        </div>
+      </React.Fragment>
+      <Dimmer active={loading}>
+        <Loader />
+      </Dimmer>
+    </Dimmer.Dimmable>
   );
 }

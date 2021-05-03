@@ -4,9 +4,27 @@ type Payload = {
   userID: string;
 };
 
-type Action = { type: 'login'; payload: Payload } | { type: 'logout' };
+type GameData = {
+  partenerId: string;
+  gameId: string;
+};
+
+type Action =
+  | { type: 'login'; payload: Payload }
+  | { type: 'logout' }
+  | {
+      type: 'create-game';
+      payload: GameData;
+    };
+
 type Dispatch = (action: Action) => void;
-type State = { logged: boolean; userID?: string };
+type State = {
+  logged: boolean;
+  userID?: string;
+  gameId?: string;
+  partenerId?: string;
+  domain: string;
+};
 type LoginProviderProps = { children: React.ReactNode };
 
 const LoginStateContext = React.createContext<
@@ -16,17 +34,24 @@ const LoginStateContext = React.createContext<
 function loginReducer(state: State, action: Action) {
   switch (action.type) {
     case 'login': {
-      return { logged: true, userID: action.payload.userID };
+      return { ...state, logged: true, userID: action.payload.userID };
     }
     case 'logout':
-      return { logged: false };
+      return { ...state, logged: false };
+    case 'create-game':
+      return { ...state, ...action.payload };
     default:
       throw new Error(`unhandled action, ${action}`);
   }
 }
 
 function LoginProvider({ children }: LoginProviderProps) {
-  const [state, dispatch] = React.useReducer(loginReducer, { logged: false });
+  const domain =
+    window.location.hostname === 'localhost' ? 'localhost' : 'gdleibaoji.hns';
+  const [state, dispatch] = React.useReducer(loginReducer, {
+    logged: false,
+    domain,
+  });
   const value = {
     state,
     dispatch,
@@ -39,7 +64,7 @@ function LoginProvider({ children }: LoginProviderProps) {
   );
 }
 
-function useLogin() {
+function useAppContext() {
   const context = React.useContext(LoginStateContext);
 
   if (context === undefined) {
@@ -49,4 +74,4 @@ function useLogin() {
   return context;
 }
 
-export { LoginProvider, useLogin };
+export { LoginProvider, useAppContext };
