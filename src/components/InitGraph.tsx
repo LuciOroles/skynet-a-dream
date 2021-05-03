@@ -7,7 +7,6 @@ import React, {
 import {
   Container,
   Form,
-  Grid,
   Button,
   Dimmer,
   Loader,
@@ -21,13 +20,12 @@ import useGraphData, {
   Roles,
   ParsedData,
 } from '../context/useGraphData';
-import GraphGenerator from './GraphGenerator';
+
 import Intro from './Intro';
 import useSkyStatus from '../context/useSkyStatus';
 import { useAppContext } from '../context/index';
-import InitBord from './InitBord';
 
-export default function Main(): ReactElement {
+export default function InitGraph(): ReactElement {
   const [userId, setUserId] = useState<string>('');
   const [gameId, setGameId] = useState<string>('');
   const [role, setRole] = useState<Roles | string>('');
