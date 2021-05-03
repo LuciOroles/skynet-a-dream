@@ -140,10 +140,10 @@ export default function Main(): ReactElement {
                   />
                 </Form.Field>
                 <Form.Field>
-                  <label>Game name</label>
+                  <label>Graph name</label>
                   <input
                     value={gameId}
-                    placeholder="Game name"
+                    placeholder="Graph name"
                     onChange={handleGameIdChange}
                   />
                 </Form.Field>
