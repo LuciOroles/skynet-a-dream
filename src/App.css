@@ -20,6 +20,13 @@
   text-transform: uppercase;
 }
 
+.badge {
+  background-color: #58b560;
+  color: #bbe32f;
+  border-radius: 10px;
+  padding: 0.25em 0.75em;
+}
+
 .header-right {
   flex: 4;
   overflow: hidden;

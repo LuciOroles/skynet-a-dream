@@ -28,11 +28,10 @@ export default function Wrapper({ col1, col2 }: Props): ReactElement {
   return (
     <GraphProvider>
       <Container>
-        <Grid columns={2} divided>
+        <Grid celled>
           <Grid.Row>
-            <Grid.Column>{col1}</Grid.Column>
-
-            <Grid.Column>{col2}</Grid.Column>
+            <Grid.Column width={6}>{col1}</Grid.Column>
+            <Grid.Column width={10}>{col2}</Grid.Column>
           </Grid.Row>
         </Grid>
       </Container>

@@ -1,7 +1,7 @@
 import React, { ReactElement, createRef, useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import { Circle } from '@svgdotjs/svg.js';
-import { Dimmer, Loader, Segment } from 'semantic-ui-react';
+import { Dimmer, Loader, Segment, Grid } from 'semantic-ui-react';
 
 import { createCircle } from '../context/useSvgDotsOnClick';
 import useSVGContext from '../context/useSVGContext';
@@ -26,8 +26,8 @@ export default function GraphGenerator(): ReactElement {
   const updateGame = useCreateGame();
   const { state } = useGraphContext();
 
-  const [dotCollection, setDotCollection] = useState<Dot[]>(state.dots || []);
-  const [activeEdges, setActiveEdges] = useState<Edge[]>(state.edges || []);
+  const [dotCollection, setDotCollection] = useState<Dot[]>([]);
+  const [activeEdges, setActiveEdges] = useState<Edge[]>([]);
   const [activeDots, setActiveDots] = useState<Dot[]>([]);
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -36,6 +36,17 @@ export default function GraphGenerator(): ReactElement {
   const [svg, setSvg] = useState<SVGElement>();
   const [listener, setListener] = useState<number>(0);
   const connect = state.role === 'connect';
+
+  useEffect(() => {
+    if (state) {
+      setDotCollection(state.dots);
+      setActiveEdges(state.edges);
+    }
+    return () => {
+      setDotCollection([]);
+      setActiveEdges([]);
+    };
+  }, [state]);
 
   const removeDotById = (dotId: string) => {
     setDotCollection((d) => d.filter((dot) => dot.id !== dotId));
@@ -147,6 +158,7 @@ export default function GraphGenerator(): ReactElement {
         edges: activeEdges,
         gameId: state.gameId,
       };
+      debugger;
       await updateGame(newData);
       setLoading(false);
     } catch (error) {
@@ -161,6 +173,28 @@ export default function GraphGenerator(): ReactElement {
 
   return (
     <Dimmer.Dimmable as={Segment} dimmed={loading}>
+      <Grid>
+        <Grid.Row>
+          <Grid.Column width={6}>
+            <h3>
+              Graph name: <span className="badge"> {state.gameId}</span>
+            </h3>
+            <span className="role">
+              You can {connect ? 'connect dots' : 'draw new dots'}
+            </span>
+          </Grid.Column>
+          <Grid.Column width={10}>
+            <Button
+              type="button"
+              onClick={handleSendGraphData}
+              primary
+              disabled={loading}
+            >
+              Update Graph
+            </Button>
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
       <React.Fragment>
         {
           <div
@@ -170,15 +204,6 @@ export default function GraphGenerator(): ReactElement {
           />
         }
         <div className="button-group">
-          <Button
-            type="button"
-            onClick={handleSendGraphData}
-            primary
-            disabled={loading}
-          >
-            Update Graph
-          </Button>
-
           <label>
             Eraser
             <input
