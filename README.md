@@ -27,3 +27,16 @@ The `vertex connector`, needs to:
 - know the public key of his `builder`
 - after the builder had inited the graph, he needs to init the graph also
 - he can find out what vertex are created and connected, by pressing the `connect to Graph` button
+
+## Creating a graph
+
+After both users have inited the game, knowing eachothers `public-id`s and the `graph-id`, they can start working.\
+
+It is yet curcial after each change, to first:
+
+1. press `Update Graph`, making sure he's updates will be pushed to the server
+2. check for updates periodically by pressing `Connect to Game`, making sure he will gets what the other user had updated.
+
+## Future imporvements:
+
+1. Add some type of real time comunication/syncrionization of the graph
