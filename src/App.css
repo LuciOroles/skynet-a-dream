@@ -36,7 +36,7 @@
   flex-direction: column;
 }
 .userId {
-  max-width: 160px;
+  max-width: 140px;
   overflow: hidden;
 }
 .listMenu {
@@ -88,4 +88,20 @@
 .introHeader {
   justify-content: center;
   display: flex;
+}
+
+.copy-clipboard {
+  width: 1em;
+  height: 1em;
+  cursor: pointer;
+}
+
+.copy-clipboard img {
+  width: 100%;
+}
+
+.user-public-id {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 0.75em;
 }
