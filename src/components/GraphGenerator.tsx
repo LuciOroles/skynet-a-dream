@@ -96,10 +96,14 @@ export default function GraphGenerator(): ReactElement {
         drawEdgeTuple(drawCtx, eTuple);
       });
       dotCollection.forEach((dot) => {
+        const isActive = activeDots.find((d) => dot.id === d.id);
+
         createCircle(
           drawCtx,
           {
             ...drawConfig,
+            color: isActive ? 'green' : drawConfig.color,
+
             startPos: { ...dot },
             id: dot.id,
           },
