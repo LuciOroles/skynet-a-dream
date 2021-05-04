@@ -162,7 +162,6 @@ export default function GraphGenerator(): ReactElement {
         edges: activeEdges,
         gameId: state.gameId,
       };
-      debugger;
       await updateGame(newData);
       setLoading(false);
     } catch (error) {

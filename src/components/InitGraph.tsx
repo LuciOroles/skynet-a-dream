@@ -52,7 +52,6 @@ export default function InitGraph(): ReactElement {
           edges: [],
         });
         console.log(r);
-        debugger;
       }
     } catch (error) {
       console.error('Unable to create game!');
