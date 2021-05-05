@@ -35,16 +35,18 @@ export default function GraphGenerator(): ReactElement {
 
   const [svg, setSvg] = useState<SVGElement>();
   const [listener, setListener] = useState<number>(0);
-  const connect = state.role === 'connect';
+  const [connect, setConnect] = useState<boolean>(true);
 
   useEffect(() => {
     if (state) {
       setDotCollection(state.dots);
       setActiveEdges(state.edges);
+      setConnect(state.role === 'connect');
     }
     return () => {
       setDotCollection([]);
       setActiveEdges([]);
+      setConnect(true);
     };
   }, [state]);
 
