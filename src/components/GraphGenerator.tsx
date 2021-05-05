@@ -170,7 +170,7 @@ export default function GraphGenerator(): ReactElement {
     }
   };
 
-  if (dotCollection.length === 0 && activeEdges.length === 0) {
+  if (!Array.isArray(dotCollection) && !Array.isArray(activeEdges)) {
     return <h3>No data yet!</h3>;
   }
 
